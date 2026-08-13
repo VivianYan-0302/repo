@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>作文練習 - 高中學習平台</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <style>
+    /* ===== Writing Page Specific ===== */
+    .writing-layout {
+      display: grid;
+      grid-template-columns: 1fr 360px;
+      gap: 1.5rem;
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem;
+    }
+    @media (max-width: 800px) {
+      .writing-layout { grid-template-columns: 1fr; }
+    }
+
+    /* 題目卡 */
+    .prompt-card {
+      background: #fff;
+      border-radius: 12px;
+      padding: 1.5rem;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+      margin-bottom: 1.2rem;
+    }
+    .prompt-card h2 { font-size: 1rem; color: #5a6a7e; margin-bottom: 0.8rem; }
+    .prompt-title {
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: #1e3a5f;
+      margin-bottom: 0.8rem;
+    }
+    .prompt-desc { font-size: 0.95rem; color: #3a4a5e; line-height: 1.8; }
+    .prompt-meta {
+      display: flex; gap: 0.8rem; margin-top: 1rem; flex-wrap: wrap;
+    }
+    .prompt-tag {
+      padding: 0.2rem 0.7rem;
+      border-radius: 99px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      background: #e0e7ff;
+      color: #3730a3;
+    }
+
+    /* 作文框 */
+    .writing-area-wrap {
+      background: #fff;
+      border-radius: 12px;
+      padding: 1.5rem;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+    }
+    .writing-toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.8rem;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+    .writing-toolbar h3 { font-size: 1rem; color: #1e3a5f; }
+    .word-counter {
+      font-size: 0.88rem;
+      color: #5a6a7e;
+      background: #f0f4f8;
+      padding: 0.3rem 0.8rem;
+      border-radius: 99px;
+    }
+    .word-counter.warn  { background: #fef9c3; color: #854d0e; }
+    .word-counter.good  { background: #dcfce7; color: #166534; }
+    #essayTextarea {
+      width: 100%;
+      min-height: 420px;
+      border: 1.5px solid #c0d0e0;
+      border-radius: 8px;
+      padding: 1rem;
+      font-size: 1rem;
+      font-family: "Noto Sans TC", "Microsoft JhengHei", sans-serif;
+      line-height: 2;
+      color: #1a2332;
+      resize: vertical;
+      transition: border-color 0.2s;
+    }
+    #essayTextarea:focus { outline: none; border-color: #4a9eff; }
+    .writing-actions {
+      display: flex; gap: 0.8rem; margin-top: 1rem; flex-wrap: wrap;
+    }
+
+    /* 側邊欄 */
+    .sidebar { display: flex; flex-direction: column; gap: 1.2rem; }
+
+    /* 評分標準說明卡 */
+    .criteria-card {
+      background: #fff;
+      border-radius: 12px;
+      padding: 1.2rem 1.5rem;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+    }
+    .criteria-card h3 {
+      font-size: 1rem; color: #1e3a5f;
+      margin-bottom: 1rem;
+      border-bottom: 2px solid #e2e8f0;
+      padding-bottom: 0.5rem;
+    }
+    .criteria-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      padding: 0.6rem 0;
+      border-bottom: 1px solid #f0f4f8;
+      font-size: 0.88rem;
+    }
+    .criteria-item:last-child { border-bottom: none; }
+    .criteria-name { color: #1e3a5f; font-weight: 600; }
+    .criteria-score { color: #5a6a7e; white-space: nowrap; margin-left: 0.5rem; }
+
+    /* 評分結果卡 */
+    .score-result-card {
+      background: #fff;
+      border-radius: 12px;
+      padding: 1.5rem;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+      display: none;
+    }
+    .score-result-card.show { display: block; }
+    .score-result-card h3 {
+      font-size: 1rem; color: #1e3a5f;
+      margin-bottom: 1rem;
+      border-bottom: 2px solid #e2e8f0;
+      padding-bottom: 0.5rem;
+    }
+    .total-score-display {
+      text-align: center;
+      margin-bottom: 1.2rem;
+    }
+    .total-score-num {
+      font-size: 3.5rem;
+      font-weight: 800;
+      line-height: 1;
+    }
+    .total-score-max { font-size: 1.1rem; color: #5a6a7e; }
+    .total-score-grade {
+      display: inline-block;
+      padding: 0.3rem 1rem;
+      border-radius: 99px;
+      font-weight: 700;
+      font-size: 1rem;
+      margin-top: 0.5rem;
+    }
+    .grade-A { background: #dcfce7; color: #166534; }
+    .grade-B { background: #d1fae5; color: #065f46; }
+    .grade-C { background: #fef9c3; color: #854d0e; }
+    .grade-D { background: #fee2e2; color: #991b1b; }
+
+    .score-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.55rem 0;
+      border-bottom: 1px solid #f0f4f8;
+      font-size: 0.88rem;
+    }
+    .score-row:last-of-type { border-bottom: none; }
+    .score-bar-wrap {
+      width: 90px; height: 7px;
+      background: #e2e8f0;
+      border-radius: 99px;
+      overflow: hidden;
+      margin: 0 0.6rem;
+    }
+    .score-bar-fill { height: 100%; border-radius: 99px; background: #4a9eff; }
+
+    .feedback-section { margin-top: 1rem; }
+    .feedback-section h4 { font-size: 0.88rem; color: #1e3a5f; font-weight: 700; margin-bottom: 0.5rem; }
+    .feedback-item {
+      background: #f7f9fc;
+      border-left: 3px solid #4a9eff;
+      padding: 0.5rem 0.8rem;
+      border-radius: 0 6px 6px 0;
+      font-size: 0.83rem;
+      color: #3a4a5e;
+      line-height: 1.6;
+      margin-bottom: 0.5rem;
+    }
+    .feedback-item.warn { border-left-color: #f59e0b; background: #fffbeb; }
+    .feedback-item.good { border-left-color: #22c55e; background: #f0fdf4; }
+
+    /* 題目選擇器 */
+    .prompt-selector {
+      background: #fff;
+      border-radius: 12px;
+      padding: 1.2rem 1.5rem;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+    }
+    .prompt-selector h3 { font-size: 1rem; color: #1e3a5f; margin-bottom: 0.8rem; }
+    .prompt-selector select {
+      width: 100%;
+      padding: 0.5rem 0.8rem;
+      border: 1.5px solid #c0d0e0;
+      border-radius: 6px;
+      font-size: 0.92rem;
+      color: #1a2332;
+      margin-bottom: 0.8rem;
+    }
+
+    /* 歷史作文記錄 */
+    .history-list { max-height: 200px; overflow-y: auto; }
+    .history-item {
+      padding: 0.55rem 0.8rem;
+      border-radius: 6px;
+      font-size: 0.82rem;
+      cursor: pointer;
+      border-bottom: 1px solid #f0f4f8;
+      display: flex;
+      justify-content: space-between;
+      transition: background 0.15s;
+    }
+    .history-item:hover { background: #f0f4f8; }
+    .history-item .h-title { color: #1e3a5f; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 140px; }
+    .history-item .h-score { color: #4a9eff; font-weight: 700; }
+  </style>
+</head>
+<body>
+  <nav class="navbar">
+    <div class="nav-brand">📚 高中學習平台</div>
+    <ul class="nav-links">
+      <li><a href="index.html">首頁</a></li>
+      <li><a href="subjects.html">科目複習</a></li>
+      <li><a href="exam.html">學測考古題</a></li>
+      <li><a href="writing.html" class="active">作文練習</a></li>
+      <li><a href="qa.html">智慧問答</a></li>
+      <li><a href="record.html">學習記錄</a></li>
+    </ul>
+  </nav>
+
+  <div class="page-header">
+    <h1>✍️ 作文練習</h1>
+    <p>依照大考中心評分標準，即時分析你的作文</p>
+  </div>
+
+  <div class="writing-layout">
+
+    <!-- 左側：題目 + 寫作區 -->
+    <div class="left-col">
+
+      <!-- 題目卡 -->
+      <div class="prompt-card">
+        <h2>📋 作文題目</h2>
+        <div class="prompt-title" id="promptTitle">論述的力量</div>
+        <div class="prompt-desc" id="promptDesc">
+          現代社會中，每個人都有表達意見的機會，然而並非所有論述都具有說服力。請以「論述的力量」為題，論述你對有效溝通與說服的看法，並結合個人經驗或觀察，說明如何運用有力的論述影響他人或社會。
+        </div>
+        <div class="prompt-meta" id="promptMeta">
+          <span class="prompt-tag">議論文</span>
+          <span class="prompt-tag">學測常考</span>
+          <span class="prompt-tag">600～800字</span>
+        </div>
+      </div>
+
+      <!-- 寫作區 -->
+      <div class="writing-area-wrap">
+        <div class="writing-toolbar">
+          <h3>✏️ 開始作答</h3>
+          <span class="word-counter" id="wordCounter">0 字</span>
+        </div>
+        <textarea id="essayTextarea" placeholder="請在此輸入你的作文…&#10;&#10;學測國文作文建議字數：600～800字&#10;英文作文建議字數：120～150字"></textarea>
+        <div class="writing-actions">
+          <button class="btn btn-primary" onclick="scoreEssay()">📊 評分作文</button>
+          <button class="btn btn-outline" onclick="clearEssay()">清除</button>
+          <button class="btn btn-secondary" onclick="saveEssay()">💾 儲存草稿</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 右側欄 -->
+    <div class="sidebar">
+
+      <!-- 換題目 -->
+      <div class="prompt-selector">
+        <h3>🎲 選擇題目</h3>
+        <select id="promptSelect" onchange="changePrompt()">
+          <option value="0">論述的力量（議論文）</option>
+          <option value="1">那一刻，我長大了（記敘文）</option>
+          <option value="2">城市與鄉村（描述文）</option>
+          <option value="3">科技改變生活（議論文）</option>
+          <option value="4">我最敬佩的人（記敘文）</option>
+          <option value="5">面對挫折（議論/記敘）</option>
+          <option value="6">環境保護的責任（議論文）</option>
+          <option value="7">一封信（書信體）</option>
+        </select>
+        <button class="btn btn-outline" style="width:100%;font-size:0.88rem;" onclick="randomPrompt()">🎲 隨機換題</button>
+      </div>
+
+      <!-- 大考中心評分標準 -->
+      <div class="criteria-card">
+        <h3>📏 大考中心評分標準</h3>
+        <div class="criteria-item">
+          <div>
+            <div class="criteria-name">一、立意取材</div>
+            <div style="font-size:0.78rem;color:#5a6a7e;margin-top:2px;">主題明確、取材恰當、內容充實</div>
+          </div>
+          <div class="criteria-score">20分</div>
+        </div>
+        <div class="criteria-item">
+          <div>
+            <div class="criteria-name">二、結構組織</div>
+            <div style="font-size:0.78rem;color:#5a6a7e;margin-top:2px;">脈絡清晰、層次分明、首尾呼應</div>
+          </div>
+          <div class="criteria-score">20分</div>
+        </div>
+        <div class="criteria-item">
+          <div>
+            <div class="criteria-name">三、遣詞造句</div>
+            <div style="font-size:0.78rem;color:#5a6a7e;margin-top:2px;">用字精準、句式變化、文字流暢</div>
+          </div>
+          <div class="criteria-score">20分</div>
+        </div>
+        <div class="criteria-item">
+          <div>
+            <div class="criteria-name">四、錯別字及標點</div>
+            <div style="font-size:0.78rem;color:#5a6a7e;margin-top:2px;">每1個錯別字扣1分，上限扣5分</div>
+          </div>
+          <div class="criteria-score">扣分制</div>
+        </div>
+        <div class="criteria-item" style="border-bottom:none;">
+          <div>
+            <div class="criteria-name" style="color:#2563a8;">總分</div>
+          </div>
+          <div class="criteria-score" style="color:#2563a8;font-weight:700;">60分</div>
+        </div>
+      </div>
+
+      <!-- 評分結果 -->
+      <div class="score-result-card" id="scoreResultCard">
+        <h3>📊 評分結果</h3>
+        <div class="total-score-display">
+          <div class="total-score-num" id="totalScoreNum" style="color:#2563a8;">—</div>
+          <div class="total-score-max">/ 60 分</div>
+          <div><span class="total-score-grade" id="gradeLabel"></span></div>
+        </div>
+
+        <div id="scoreRows"></div>
+
+        <div class="feedback-section">
+          <h4>📝 具體建議</h4>
+          <div id="feedbackList"></div>
+        </div>
+
+        <button class="btn btn-outline" style="width:100%;margin-top:1rem;font-size:0.88rem;" onclick="saveWritingRecord()">💾 儲存此次成績</button>
+      </div>
+
+      <!-- 歷史作文 -->
+      <div class="criteria-card" id="historyCard">
+        <h3>📁 歷史作文</h3>
+        <div class="history-list" id="historyList">
+          <p style="color:#5a6a7e;font-size:0.85rem;">尚無儲存的作文</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <footer>
+    <p>© 2025 高中線上學習平台｜祝你金榜題名 🎉</p>
+  </footer>
+
+  <script>
+  // ===== 題目資料 =====
+  const PROMPTS = [
+    {
+      title: "論述的力量",
+      desc: "現代社會中，每個人都有表達意見的機會，然而並非所有論述都具有說服力。請以「論述的力量」為題，論述你對有效溝通與說服的看法，並結合個人經驗或觀察，說明如何運用有力的論述影響他人或社會。",
+      tags: ["議論文","學測常考","600～800字"], type:"議論文"
+    },
+    {
+      title: "那一刻，我長大了",
+      desc: "成長是一段漫長的旅程，往往在某個不經意的瞬間，我們突然意識到自己已經改變。請以「那一刻，我長大了」為題，描述一次讓你深刻體悟成長的經歷，並抒發你對成長的感受與思考。",
+      tags: ["記敘文","抒情","600～800字"], type:"記敘文"
+    },
+    {
+      title: "城市與鄉村",
+      desc: "城市繁華便利，鄉村寧靜質樸。在快速都市化的現代，城鄉之間的差距與連結成為重要的議題。請以「城市與鄉村」為題，描繪你對兩種生活環境的觀察，並表達你的看法與想像。",
+      tags: ["描述文","社會議題","600～800字"], type:"描述文"
+    },
+    {
+      title: "科技改變生活",
+      desc: "人工智慧、社群媒體、智慧型裝置……科技以前所未有的速度改變我們的日常。請以「科技改變生活」為題，論述科技帶來的正面影響與潛在問題，並提出你認為人類應如何與科技共存的觀點。",
+      tags: ["議論文","時事議題","600～800字"], type:"議論文"
+    },
+    {
+      title: "我最敬佩的人",
+      desc: "在你的生命中，是否有一位讓你深深敬佩的人？他或她可以是家人、師長、歷史人物或公眾人物。請以「我最敬佩的人」為題，描述這位人物的特質與事蹟，並說明他或她對你的影響。",
+      tags: ["記敘文","人物描寫","600～800字"], type:"記敘文"
+    },
+    {
+      title: "面對挫折",
+      desc: "人生難免遭遇挫折與失敗，如何面對挫折，往往決定了一個人的高度。請以「面對挫折」為題，結合個人經驗或觀察，論述你對挫折的看法，以及從挫折中獲得的啟示與成長。",
+      tags: ["議論/記敘","品格教育","600～800字"], type:"議論/記敘"
+    },
+    {
+      title: "環境保護的責任",
+      desc: "氣候變遷、生態破壞、塑膠污染……地球正面臨前所未有的環境危機。請以「環境保護的責任」為題，論述個人、企業與政府在環境保護中各自應承擔的責任，並提出具體可行的建議。",
+      tags: ["議論文","環境議題","600～800字"], type:"議論文"
+    },
+    {
+      title: "一封信",
+      desc: "請以書信的形式，寫一封給「未來的自己」、「過去的自己」或「你最想傾訴的對象」的信。信中可以分享你的心情、期望、反思或祝福，文體採書信格式（稱謂、正文、署名）。",
+      tags: ["書信體","抒情","400～600字"], type:"書信體"
+    }
+  ];
+
+  let currentPromptIdx = 0;
+
+  // ===== 初始化 =====
+  function init() {
+    document.getElementById('essayTextarea').addEventListener('input', updateWordCount);
+    loadHistory();
+  }
+
+  // ===== 字數統計 =====
+  function updateWordCount() {
+    const text = document.getElementById('essayTextarea').value;
+    const count = text.replace(/\s/g,'').length;
+    const el = document.getElementById('wordCounter');
+    el.textContent = count + ' 字';
+    el.className = 'word-counter';
+    if (count > 0 && count < 400)       el.className += ' warn';
+    else if (count >= 400 && count <= 900) el.className += ' good';
+  }
+
+  // ===== 換題目 =====
+  function changePrompt() {
+    currentPromptIdx = parseInt(document.getElementById('promptSelect').value);
+    renderPrompt(currentPromptIdx);
+  }
+  function randomPrompt() {
+    const idx = Math.floor(Math.random() * PROMPTS.length);
+    document.getElementById('promptSelect').value = idx;
+    currentPromptIdx = idx;
+    renderPrompt(idx);
+  }
+  function renderPrompt(idx) {
+    const p = PROMPTS[idx];
+    document.getElementById('promptTitle').textContent = p.title;
+    document.getElementById('promptDesc').textContent  = p.desc;
+    document.getElementById('promptMeta').innerHTML = p.tags.map(t => `<span class="prompt-tag">${t}</span>`).join('');
+    document.getElementById('essayTextarea').value = '';
+    document.getElementById('wordCounter').textContent = '0 字';
+    document.getElementById('wordCounter').className = 'word-counter';
+    document.getElementById('scoreResultCard').classList.remove('show');
+  }
+
+  // ===== 清除 =====
+  function clearEssay() {
+    if (document.getElementById('essayTextarea').value && !confirm('確定清除作文內容？')) return;
+    document.getElementById('essayTextarea').value = '';
+    updateWordCount();
+    document.getElementById('scoreResultCard').classList.remove('show');
+  }
+
+  // ===== 大考中心評分邏輯 =====
+  function scoreEssay() {
+    const text  = document.getElementById('essayTextarea').value.trim();
+    const count = text.replace(/\s/g,'').length;
+
+    if (count < 50) {
+      alert('作文內容太短，請至少寫 50 字後再評分！');
+      return;
+    }
+
+    const prompt  = PROMPTS[currentPromptIdx];
+    const scores  = calcScores(text, count, prompt);
+    renderScoreResult(scores, text, count, prompt);
+  }
+
+  function calcScores(text, count, prompt) {
+    const sentences = text.split(/[。！？…\n]+/).filter(s => s.trim().length > 2);
+    const paragraphs = text.split(/\n+/).filter(p => p.trim().length > 0);
+    const avgSentLen = sentences.length ? count / sentences.length : 0;
+
+    // --- 1. 立意取材 (0~20) ---
+    let intention = 10; // 基礎分
+    // 字數影響
+    if (count >= 600 && count <= 800) intention += 5;
+    else if (count >= 400) intention += 3;
+    else if (count >= 200) intention += 1;
+    // 是否含有關鍵字（與題目相關）
+    const titleKeywords = prompt.title.replace(/[，。？！、]/g,'').split('');
+    const keyHits = titleKeywords.filter(k => k.length > 0 && text.includes(k)).length;
+    intention += Math.min(5, Math.floor(keyHits / 2));
+    intention = Math.min(20, intention);
+
+    // --- 2. 結構組織 (0~20) ---
+    let structure = 8;
+    // 段落數量
+    if (paragraphs.length >= 4)      structure += 5;
+    else if (paragraphs.length >= 3) structure += 3;
+    else if (paragraphs.length >= 2) structure += 1;
+    // 是否有開頭/結尾（首尾呼應）
+    const firstPara = paragraphs[0] || '';
+    const lastPara  = paragraphs[paragraphs.length - 1] || '';
+    if (firstPara.length > 20 && lastPara.length > 20) structure += 4;
+    // 是否有承接詞
+    const connectors = ['首先','其次','再者','然而','因此','總而言之','綜上所述','由此可見','不僅','而且','雖然','但是','況且','反觀'];
+    const connHits = connectors.filter(c => text.includes(c)).length;
+    structure += Math.min(3, connHits);
+    structure = Math.min(20, structure);
+
+    // --- 3. 遣詞造句 (0~20) ---
+    let diction = 8;
+    // 句子長度適中（太長或太短都扣）
+    if (avgSentLen >= 15 && avgSentLen <= 35) diction += 4;
+    else if (avgSentLen >= 10) diction += 2;
+    // 成語/佳句偵測
+    const idioms = ['一石二鳥','一舉兩得','不謀而合','相輔相成','舉足輕重','不言而喻','循序漸進','觸類旁通','鍥而不捨','精益求精','見微知著','以小見大','推陳出新','化危機為轉機','防微杜漸'];
+    const idiomHits = idioms.filter(i => text.includes(i)).length;
+    diction += Math.min(4, idiomHits * 2);
+    // 字彙豐富度（粗估：不重複字數/總字數）
+    const uniqueChars = new Set(text.replace(/[\s\n。，！？、：；「」【】（）]/g,'')).size;
+    const richness = uniqueChars / Math.max(count, 1);
+    if (richness > 0.5)      diction += 4;
+    else if (richness > 0.35) diction += 2;
+    diction = Math.min(20, diction);
+
+    // --- 4. 錯別字及標點扣分 (0 ~ -5) ---
+    // 常見錯別字偵測
+    const typoMap = [
+      ['在乎','在呼'],['獲得','獲的'],['以為','已為'],['必須','必需'],['在意','再意'],
+      ['帶來','待來'],['再見','在見'],['已經','以經'],['不僅','不進'],['因此','因次']
+    ];
+    let typoCount = 0;
+    typoMap.forEach(([correct, wrong]) => { if (text.includes(wrong)) typoCount++; });
+    const deduction = Math.min(5, typoCount);
+
+    // --- 總分 ---
+    const total = Math.max(0, intention + structure + diction - deduction);
+
+    return { intention, structure, diction, deduction, total, typoCount, count, paragraphs: paragraphs.length, connHits, idiomHits };
+  }
+
+  function renderScoreResult(s, text, count, prompt) {
+    const card = document.getElementById('scoreResultCard');
+    card.classList.add('show');
+
+    // 總分顯示
+    document.getElementById('totalScoreNum').textContent = s.total;
+    const gradeEl = document.getElementById('gradeLabel');
+    let grade, gClass;
+    if      (s.total >= 54) { grade = 'A＋ 優等'; gClass = 'grade-A'; }
+    else if (s.total >= 48) { grade = 'A　 甲等'; gClass = 'grade-A'; }
+    else if (s.total >= 42) { grade = 'B　 乙等'; gClass = 'grade-B'; }
+    else if (s.total >= 30) { grade = 'C　 丙等'; gClass = 'grade-C'; }
+    else                    { grade = 'D　 丁等'; gClass = 'grade-D'; }
+    gradeEl.textContent = grade;
+    gradeEl.className   = 'total-score-grade ' + gClass;
+
+    // 各項分數
+    const items = [
+      { name:'一、立意取材', score: s.intention, max: 20 },
+      { name:'二、結構組織', score: s.structure, max: 20 },
+      { name:'三、遣詞造句', score: s.diction,   max: 20 },
+      { name:'四、錯別字扣分', score: -s.deduction, max: 0 }
+    ];
+    document.getElementById('scoreRows').innerHTML = items.map(item => {
+      const pct   = item.max > 0 ? (item.score / item.max * 100) : 0;
+      const color = item.score < 0 ? '#ef4444' : item.score >= item.max * 0.8 ? '#22c55e' : item.score >= item.max * 0.6 ? '#f59e0b' : '#4a9eff';
+      return `
+        <div class="score-row">
+          <span style="color:#1e3a5f;font-size:0.82rem;">${item.name}</span>
+          <div style="display:flex;align-items:center;">
+            ${item.max > 0 ? `<div class="score-bar-wrap"><div class="score-bar-fill" style="width:${pct}%;background:${color};"></div></div>` : ''}
+            <span style="font-weight:700;color:${color};font-size:0.92rem;min-width:32px;text-align:right;">${item.score > 0 ? item.score : item.score}</span>
+          </div>
+        </div>`;
+    }).join('');
+
+    // 具體建議
+    const feedbacks = [];
+    if (count < 400)  feedbacks.push({ type:'warn', text:`字數僅 ${count} 字，學測建議 600～800 字，字數不足會影響立意取材與遣詞造句分數。` });
+    if (count > 900)  feedbacks.push({ type:'warn', text:`字數 ${count} 字偏多，建議精簡至 800 字以內，避免冗贅。` });
+    if (count >= 600 && count <= 800) feedbacks.push({ type:'good', text:`字數 ${count} 字，符合學測建議範圍，很好！` });
+    if (s.paragraphs < 3) feedbacks.push({ type:'warn', text:`段落數僅 ${s.paragraphs} 段，建議分為 4～5 段（引言、論點一、論點二、結論），使結構更清晰。` });
+    if (s.connHits === 0) feedbacks.push({ type:'warn', text:'缺少承接詞（如「首先」、「其次」、「然而」、「因此」），加入承接詞可提升結構組織分數。' });
+    if (s.connHits >= 2)  feedbacks.push({ type:'good', text:`使用了 ${s.connHits} 個承接詞，段落銜接流暢。` });
+    if (s.idiomHits > 0)  feedbacks.push({ type:'good', text:`偵測到 ${s.idiomHits} 個成語，運用得當可提升遣詞造句分數。` });
+    if (s.typoCount > 0)  feedbacks.push({ type:'warn', text:`偵測到可能的錯別字 ${s.typoCount} 處，每個錯別字扣 1 分（最多扣 5 分），請仔細檢查。` });
+    if (s.intention >= 16) feedbacks.push({ type:'good', text:'立意取材豐富，內容切題，繼續保持！' });
+    if (s.diction >= 16)   feedbacks.push({ type:'good', text:'遣詞造句流暢精準，語文表達能力佳！' });
+    if (feedbacks.length === 0) feedbacks.push({ type:'good', text:'整體表現不錯，繼續多練習、多閱讀，提升語文底蘊！' });
+
+    document.getElementById('feedbackList').innerHTML = feedbacks.map(f =>
+      `<div class="feedback-item ${f.type}">${f.text}</div>`
+    ).join('');
+
+    card.scrollIntoView({ behavior:'smooth', block:'nearest' });
+  }
+
+  // ===== 儲存草稿 =====
+  function saveEssay() {
+    const text  = document.getElementById('essayTextarea').value.trim();
+    if (!text) { alert('請先輸入作文內容！'); return; }
+    const prompt = PROMPTS[currentPromptIdx];
+    const drafts = JSON.parse(localStorage.getItem('essayDrafts') || '[]');
+    drafts.unshift({
+      date:    new Date().toLocaleDateString('zh-TW'),
+      time:    new Date().toLocaleTimeString('zh-TW', {hour:'2-digit', minute:'2-digit'}),
+      title:   prompt.title,
+      content: text,
+      score:   null
+    });
+    localStorage.setItem('essayDrafts', JSON.stringify(drafts.slice(0, 20)));
+    loadHistory();
+    alert('草稿已儲存！');
+  }
+
+  // ===== 儲存評分記錄 =====
+  function saveWritingRecord() {
+    const text  = document.getElementById('essayTextarea').value.trim();
+    const scoreEl = document.getElementById('totalScoreNum').textContent;
+    if (scoreEl === '—') { alert('請先評分！'); return; }
+    const prompt = PROMPTS[currentPromptIdx];
+    const drafts = JSON.parse(localStorage.getItem('essayDrafts') || '[]');
+    drafts.unshift({
+      date:    new Date().toLocaleDateString('zh-TW'),
+      time:    new Date().toLocaleTimeString('zh-TW', {hour:'2-digit', minute:'2-digit'}),
+      title:   prompt.title,
+      content: text,
+      score:   parseInt(scoreEl)
+    });
+    localStorage.setItem('essayDrafts', JSON.stringify(drafts.slice(0, 20)));
+
+    // 同步到學習記錄
+    const records = JSON.parse(localStorage.getItem('studyRecords') || '[]');
+    records.unshift({
+      date:       new Date().toLocaleDateString('zh-TW'),
+      time:       new Date().toLocaleTimeString('zh-TW', {hour:'2-digit', minute:'2-digit'}),
+      subject:    '作文練習',
+      difficulty: '—',
+      score:      parseInt(scoreEl),
+      total:      60,
+      pct:        Math.round(parseInt(scoreEl) / 60 * 100)
+    });
+    localStorage.setItem('studyRecords', JSON.stringify(records.slice(0, 100)));
+    loadHistory();
+    alert('成績已儲存至學習記錄！');
+  }
+
+  // ===== 載入歷史 =====
+  function loadHistory() {
+    const drafts = JSON.parse(localStorage.getItem('essayDrafts') || '[]');
+    const el = document.getElementById('historyList');
+    if (drafts.length === 0) {
+      el.innerHTML = '<p style="color:#5a6a7e;font-size:0.85rem;">尚無儲存的作文</p>';
+      return;
+    }
+    el.innerHTML = drafts.map((d, i) => `
+      <div class="history-item" onclick="loadDraft(${i})">
+        <span class="h-title">${d.date} ${d.title}</span>
+        <span class="h-score">${d.score !== null ? d.score + '分' : '草稿'}</span>
+      </div>
+    `).join('');
+  }
+
+  function loadDraft(idx) {
+    const drafts = JSON.parse(localStorage.getItem('essayDrafts') || '[]');
+    const d = drafts[idx];
+    if (!d) return;
+    // 找到對應題目
+    const pIdx = PROMPTS.findIndex(p => p.title === d.title);
+    if (pIdx >= 0) {
+      document.getElementById('promptSelect').value = pIdx;
+      currentPromptIdx = pIdx;
+      renderPrompt(pIdx);
+    }
+    document.getElementById('essayTextarea').value = d.content;
+    updateWordCount();
+  }
+
+  init();
+  </script>
+</body>
+</html>

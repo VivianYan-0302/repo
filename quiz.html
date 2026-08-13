@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>科目練習 - 高中學習平台</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <nav class="navbar">
+    <div class="nav-brand">📚 高中學習平台</div>
+    <ul class="nav-links">
+      <li><a href="index.html">首頁</a></li>
+      <li><a href="subjects.html">科目複習</a></li>
+      <li><a href="exam.html">學測考古題</a></li>
+      <li><a href="writing.html">作文練習</a></li>
+      <li><a href="qa.html">智慧問答</a></li>
+      <li><a href="record.html">學習記錄</a></li>
+    </ul>
+  </nav>
+
+  <div class="page-header" id="quizHeader">
+    <h1 id="quizTitle">科目練習</h1>
+    <p id="quizSubtitle">調整難度後開始測驗</p>
+  </div>
+
+  <div class="container">
+
+    <!-- 設定區 -->
+    <div class="quiz-settings" id="settingsBar">
+      <div>
+        <label>難易度：</label>
+        <div class="difficulty-btns">
+          <button class="diff-btn easy active"   data-diff="easy"   onclick="setDifficulty('easy')">基礎</button>
+          <button class="diff-btn medium"         data-diff="medium" onclick="setDifficulty('medium')">進階</button>
+          <button class="diff-btn hard"           data-diff="hard"   onclick="setDifficulty('hard')">挑戰</button>
+          <button class="diff-btn"                data-diff="all"    onclick="setDifficulty('all')" style="background:#e2e8f0;color:#1e3a5f;border-color:#c0ccd8;">全部</button>
+        </div>
+      </div>
+      <div>
+        <label for="qCount">題數：</label>
+        <input type="number" id="qCount" value="5" min="1" max="20" style="width:60px;" />
+      </div>
+      <button class="btn btn-primary" onclick="startQuiz()">開始測驗</button>
+      <a href="subjects.html" class="btn btn-outline">換科目</a>
+    </div>
+
+    <!-- 測驗區 -->
+    <div id="quizArea" style="display:none;">
+      <div class="quiz-card">
+        <div class="quiz-progress" id="progressText">第 1 題 / 共 5 題</div>
+        <div class="progress-bar-wrap">
+          <div class="progress-bar-fill" id="progressBar" style="width:0%"></div>
+        </div>
+        <div class="question-text" id="questionText"></div>
+        <ul class="options-list" id="optionsList"></ul>
+        <div class="explanation" id="explanationBox" style="display:none;"></div>
+        <div class="quiz-nav">
+          <span id="answerFeedback" style="font-weight:600;font-size:1rem;"></span>
+          <button class="btn btn-primary" id="nextBtn" onclick="nextQuestion()" style="display:none;">下一題 →</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 結果區 -->
+    <div id="resultArea" style="display:none;">
+      <div class="result-card">
+        <div class="result-score" id="resultScore">0/0</div>
+        <div class="result-label" id="resultLabel"></div>
+        <div class="result-breakdown" id="resultBreakdown"></div>
+        <div style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;">
+          <button class="btn btn-primary" onclick="startQuiz()">再練一次</button>
+          <a href="subjects.html" class="btn btn-secondary">選擇其他科目</a>
+          <a href="record.html"   class="btn btn-outline">查看記錄</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- 尚未開始提示 -->
+    <div id="startPrompt" style="text-align:center;padding:3rem 0;color:#5a6a7e;">
+      <div style="font-size:3rem;margin-bottom:1rem;">🎯</div>
+      <p style="font-size:1.1rem;">設定好難度與題數後，按「開始測驗」</p>
+    </div>
+
+  </div>
+
+  <footer>
+    <p>© 2025 高中線上學習平台｜祝你金榜題名 🎉</p>
+  </footer>
+
+  <script src="data/questions.js"></script>
+  <script>
+    const SUBJECT_NAMES = {
+      chinese:'國文', english:'英文', math:'數學',
+      physics:'物理', chemistry:'化學', biology:'生物',
+      history:'歷史', geography:'地理', civics:'公民'
+    };
+
+    // 從 URL 取得參數
+    const params = new URLSearchParams(location.search);
+    const subject = params.get('subject') || 'chinese';
+    let currentDifficulty = 'easy';
+    let questions = [];
+    let currentIndex = 0;
+    let score = 0;
+    let answered = false;
+
+    // 初始化頁面標題
+    document.getElementById('quizTitle').textContent = (SUBJECT_NAMES[subject] || subject) + ' 練習';
+    document.getElementById('quizSubtitle').textContent = `${SUBJECT_NAMES[subject] || subject} — 調整難度後開始測驗`;
+    document.title = (SUBJECT_NAMES[subject] || subject) + ' 練習 - 高中學習平台';
+
+    function setDifficulty(diff) {
+      currentDifficulty = diff;
+      document.querySelectorAll('.diff-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.diff === diff);
+      });
+    }
+
+    function startQuiz() {
+      const count = parseInt(document.getElementById('qCount').value) || 5;
+      questions = getQuestions(subject, currentDifficulty, count);
+      if (questions.length === 0) {
+        alert('此難度目前沒有題目，請選擇「全部」或其他難度！');
+        return;
+      }
+      currentIndex = 0;
+      score = 0;
+      document.getElementById('startPrompt').style.display = 'none';
+      document.getElementById('quizArea').style.display = 'block';
+      document.getElementById('resultArea').style.display = 'none';
+      showQuestion();
+    }
+
+    function showQuestion() {
+      answered = false;
+      const q = questions[currentIndex];
+      const total = questions.length;
+
+      document.getElementById('progressText').textContent = `第 ${currentIndex + 1} 題 / 共 ${total} 題`;
+      document.getElementById('progressBar').style.width = `${(currentIndex / total) * 100}%`;
+      document.getElementById('questionText').textContent = q.text;
+      document.getElementById('explanationBox').style.display = 'none';
+      document.getElementById('answerFeedback').textContent = '';
+      document.getElementById('nextBtn').style.display = 'none';
+
+      const list = document.getElementById('optionsList');
+      list.innerHTML = '';
+      q.options.forEach((opt, i) => {
+        const li = document.createElement('li');
+        const btn = document.createElement('button');
+        btn.className = 'option-btn';
+        btn.textContent = `${String.fromCharCode(65+i)}. ${opt}`;
+        btn.onclick = () => selectAnswer(i);
+        li.appendChild(btn);
+        list.appendChild(li);
+      });
+    }
+
+    function selectAnswer(index) {
+      if (answered) return;
+      answered = true;
+      const q = questions[currentIndex];
+      const buttons = document.querySelectorAll('.option-btn');
+      buttons.forEach(b => b.disabled = true);
+
+      if (index === q.answer) {
+        buttons[index].classList.add('correct');
+        score++;
+        document.getElementById('answerFeedback').textContent = '✅ 答對了！';
+        document.getElementById('answerFeedback').style.color = '#166534';
+      } else {
+        buttons[index].classList.add('wrong');
+        buttons[q.answer].classList.add('correct');
+        document.getElementById('answerFeedback').textContent = '❌ 答錯了';
+        document.getElementById('answerFeedback').style.color = '#991b1b';
+      }
+
+      document.getElementById('explanationBox').textContent = '💡 解析：' + q.explanation;
+      document.getElementById('explanationBox').style.display = 'block';
+      document.getElementById('nextBtn').style.display = currentIndex < questions.length - 1 ? 'block' : 'none';
+
+      if (currentIndex === questions.length - 1) {
+        setTimeout(showResult, 1200);
+      }
+    }
+
+    function nextQuestion() {
+      currentIndex++;
+      showQuestion();
+    }
+
+    function showResult() {
+      document.getElementById('quizArea').style.display = 'none';
+      document.getElementById('resultArea').style.display = 'block';
+      const total = questions.length;
+      const pct = Math.round((score / total) * 100);
+
+      document.getElementById('resultScore').textContent = `${score} / ${total}`;
+      const label = pct >= 80 ? '🎉 太棒了！繼續保持！' : pct >= 60 ? '👍 不錯喔！再努力一下！' : '📚 繼續加油！多練習就會進步！';
+      document.getElementById('resultLabel').textContent = label;
+
+      document.getElementById('resultBreakdown').innerHTML = `
+        <div class="breakdown-item"><span style="color:#22c55e">${score}</span><span>答對題數</span></div>
+        <div class="breakdown-item"><span style="color:#ef4444">${total - score}</span><span>答錯題數</span></div>
+        <div class="breakdown-item"><span style="color:#3b82f6">${pct}%</span><span>正確率</span></div>
+      `;
+
+      // 儲存記錄
+      saveRecord(subject, SUBJECT_NAMES[subject] || subject, currentDifficulty, score, total);
+    }
+
+    function saveRecord(subjectKey, subjectName, difficulty, score, total) {
+      const records = JSON.parse(localStorage.getItem('studyRecords') || '[]');
+      records.unshift({
+        date: new Date().toLocaleDateString('zh-TW'),
+        time: new Date().toLocaleTimeString('zh-TW', {hour:'2-digit', minute:'2-digit'}),
+        subject: subjectName,
+        difficulty: difficulty,
+        score: score,
+        total: total,
+        pct: Math.round((score / total) * 100)
+      });
+      localStorage.setItem('studyRecords', JSON.stringify(records.slice(0, 100)));
+    }
+  </script>
+</body>
+</html>

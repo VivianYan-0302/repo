@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>學測考古題 - 高中學習平台</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <nav class="navbar">
+    <div class="nav-brand">📚 高中學習平台</div>
+    <ul class="nav-links">
+      <li><a href="index.html">首頁</a></li>
+      <li><a href="subjects.html">科目複習</a></li>
+      <li><a href="exam.html" class="active">學測考古題</a></li>
+      <li><a href="writing.html">作文練習</a></li>
+      <li><a href="qa.html">智慧問答</a></li>
+      <li><a href="record.html">學習記錄</a></li>
+    </ul>
+  </nav>
+
+  <div class="page-header">
+    <h1>📝 學測考古題</h1>
+    <p>歷屆學測試題練習，模擬真實考試情境</p>
+  </div>
+
+  <div class="container">
+
+    <!-- 篩選器 -->
+    <div class="exam-filter">
+      <label>年份：</label>
+      <select id="filterYear" onchange="filterExams()">
+        <option value="all">全部年份</option>
+        <option value="2023">2023年</option>
+        <option value="2022">2022年</option>
+        <option value="2021">2021年</option>
+        <option value="2020">2020年</option>
+      </select>
+      <label>科目：</label>
+      <select id="filterSubject" onchange="filterExams()">
+        <option value="all">全部科目</option>
+        <option value="國文">國文</option>
+        <option value="英文">英文</option>
+        <option value="數學">數學</option>
+        <option value="自然">自然</option>
+        <option value="社會">社會</option>
+      </select>
+      <label>難度：</label>
+      <select id="filterDiff" onchange="filterExams()">
+        <option value="all">全部難度</option>
+        <option value="easy">基礎</option>
+        <option value="medium">進階</option>
+        <option value="hard">挑戰</option>
+      </select>
+      <button class="btn btn-primary" id="startExamBtn" onclick="startExam()">開始作答</button>
+    </div>
+
+    <!-- 題目列表 -->
+    <div id="examList">
+      <div class="exam-card-list" id="examCardList"></div>
+    </div>
+
+    <!-- 測驗區 -->
+    <div id="examQuizArea" style="display:none;">
+      <div class="quiz-card">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.5rem;">
+          <div class="quiz-progress" id="examProgress">第 1 題 / 共 5 題</div>
+          <button class="btn btn-outline" style="font-size:0.82rem;padding:0.3rem 0.8rem;" onclick="exitExam()">← 返回列表</button>
+        </div>
+        <div class="progress-bar-wrap">
+          <div class="progress-bar-fill" id="examProgressBar" style="width:0%"></div>
+        </div>
+        <div style="margin-bottom:0.8rem;">
+          <span class="exam-tag tag-year" id="examTagYear"></span>
+          <span class="exam-tag tag-subject" id="examTagSubject"></span>
+        </div>
+        <div class="question-text" id="examQuestionText"></div>
+        <ul class="options-list" id="examOptionsList"></ul>
+        <div class="explanation" id="examExplanationBox" style="display:none;"></div>
+        <div class="quiz-nav">
+          <span id="examFeedback" style="font-weight:600;font-size:1rem;"></span>
+          <button class="btn btn-primary" id="examNextBtn" onclick="examNextQuestion()" style="display:none;">下一題 →</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 結果區 -->
+    <div id="examResultArea" style="display:none;">
+      <div class="result-card">
+        <div class="result-score" id="examResultScore">0/0</div>
+        <div class="result-label" id="examResultLabel"></div>
+        <div class="result-breakdown" id="examResultBreakdown"></div>
+        <div style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;">
+          <button class="btn btn-primary" onclick="startExam()">重新作答</button>
+          <button class="btn btn-secondary" onclick="exitExam()">返回列表</button>
+          <a href="record.html" class="btn btn-outline">查看記錄</a>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <footer>
+    <p>© 2025 高中線上學習平台｜祝你金榜題名 🎉</p>
+  </footer>
+
+  <script src="data/questions.js"></script>
+  <script>
+    const DIFF_MAP = { easy:'基礎', medium:'進階', hard:'挑戰' };
+    let filteredQuestions = [];
+    let examIndex = 0;
+    let examScore = 0;
+    let examAnswered = false;
+
+    function filterExams() {
+      const year    = document.getElementById('filterYear').value;
+      const subject = document.getElementById('filterSubject').value;
+      const diff    = document.getElementById('filterDiff').value;
+      filteredQuestions = getExamQuestions(year, subject, diff);
+      renderExamList();
+    }
+
+    function renderExamList() {
+      const container = document.getElementById('examCardList');
+      if (filteredQuestions.length === 0) {
+        container.innerHTML = '<p style="color:#5a6a7e;text-align:center;padding:2rem;">目前沒有符合條件的題目</p>';
+        document.getElementById('startExamBtn').disabled = true;
+        return;
+      }
+      document.getElementById('startExamBtn').disabled = false;
+      container.innerHTML = filteredQuestions.map((q, i) => `
+        <div class="exam-entry">
+          <div class="exam-entry-info">
+            <h3>${i+1}. ${q.text.length > 60 ? q.text.slice(0,60)+'...' : q.text}</h3>
+            <p>
+              <span class="exam-tag tag-year">${q.year} 年</span>
+              <span class="exam-tag tag-subject">${q.subject}</span>
+              <span class="badge ${q.difficulty==='easy'?'badge-green':q.difficulty==='medium'?'badge-yellow':'badge-red'}">${DIFF_MAP[q.difficulty]||q.difficulty}</span>
+            </p>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function startExam() {
+      if (filteredQuestions.length === 0) { filterExams(); }
+      if (filteredQuestions.length === 0) {
+        alert('請先篩選出題目後再開始作答！');
+        return;
+      }
+      examIndex = 0;
+      examScore = 0;
+      document.getElementById('examList').style.display = 'none';
+      document.getElementById('examQuizArea').style.display = 'block';
+      document.getElementById('examResultArea').style.display = 'none';
+      showExamQuestion();
+    }
+
+    function exitExam() {
+      document.getElementById('examList').style.display = 'block';
+      document.getElementById('examQuizArea').style.display = 'none';
+      document.getElementById('examResultArea').style.display = 'none';
+    }
+
+    function showExamQuestion() {
+      examAnswered = false;
+      const q = filteredQuestions[examIndex];
+      const total = filteredQuestions.length;
+
+      document.getElementById('examProgress').textContent = `第 ${examIndex+1} 題 / 共 ${total} 題`;
+      document.getElementById('examProgressBar').style.width = `${(examIndex/total)*100}%`;
+      document.getElementById('examTagYear').textContent = q.year + ' 年';
+      document.getElementById('examTagSubject').textContent = q.subject;
+      document.getElementById('examQuestionText').textContent = q.text;
+      document.getElementById('examExplanationBox').style.display = 'none';
+      document.getElementById('examFeedback').textContent = '';
+      document.getElementById('examNextBtn').style.display = 'none';
+
+      const list = document.getElementById('examOptionsList');
+      list.innerHTML = '';
+      q.options.forEach((opt, i) => {
+        const li = document.createElement('li');
+        const btn = document.createElement('button');
+        btn.className = 'option-btn';
+        btn.textContent = `${String.fromCharCode(65+i)}. ${opt}`;
+        btn.onclick = () => selectExamAnswer(i);
+        li.appendChild(btn);
+        list.appendChild(li);
+      });
+    }
+
+    function selectExamAnswer(index) {
+      if (examAnswered) return;
+      examAnswered = true;
+      const q = filteredQuestions[examIndex];
+      const buttons = document.querySelectorAll('#examOptionsList .option-btn');
+      buttons.forEach(b => b.disabled = true);
+
+      if (index === q.answer) {
+        buttons[index].classList.add('correct');
+        examScore++;
+        document.getElementById('examFeedback').textContent = '✅ 答對了！';
+        document.getElementById('examFeedback').style.color = '#166534';
+      } else {
+        buttons[index].classList.add('wrong');
+        buttons[q.answer].classList.add('correct');
+        document.getElementById('examFeedback').textContent = '❌ 答錯了';
+        document.getElementById('examFeedback').style.color = '#991b1b';
+      }
+
+      document.getElementById('examExplanationBox').textContent = '💡 解析：' + q.explanation;
+      document.getElementById('examExplanationBox').style.display = 'block';
+      document.getElementById('examNextBtn').style.display = examIndex < filteredQuestions.length - 1 ? 'block' : 'none';
+
+      if (examIndex === filteredQuestions.length - 1) {
+        setTimeout(showExamResult, 1200);
+      }
+    }
+
+    function examNextQuestion() {
+      examIndex++;
+      showExamQuestion();
+    }
+
+    function showExamResult() {
+      document.getElementById('examQuizArea').style.display = 'none';
+      document.getElementById('examResultArea').style.display = 'block';
+      const total = filteredQuestions.length;
+      const pct = Math.round((examScore / total) * 100);
+
+      document.getElementById('examResultScore').textContent = `${examScore} / ${total}`;
+      const label = pct >= 80 ? '🎉 學測準備充足！' : pct >= 60 ? '👍 繼續練習，再衝更高分！' : '📚 多練習考古題，熟悉題型！';
+      document.getElementById('examResultLabel').textContent = label;
+
+      document.getElementById('examResultBreakdown').innerHTML = `
+        <div class="breakdown-item"><span style="color:#22c55e">${examScore}</span><span>答對題數</span></div>
+        <div class="breakdown-item"><span style="color:#ef4444">${total-examScore}</span><span>答錯題數</span></div>
+        <div class="breakdown-item"><span style="color:#3b82f6">${pct}%</span><span>正確率</span></div>
+      `;
+
+      // 儲存記錄
+      const records = JSON.parse(localStorage.getItem('studyRecords') || '[]');
+      records.unshift({
+        date: new Date().toLocaleDateString('zh-TW'),
+        time: new Date().toLocaleTimeString('zh-TW', {hour:'2-digit', minute:'2-digit'}),
+        subject: '學測考古題',
+        difficulty: document.getElementById('filterDiff').value,
+        score: examScore,
+        total: total,
+        pct: pct
+      });
+      localStorage.setItem('studyRecords', JSON.stringify(records.slice(0, 100)));
+    }
+
+    // 初始化
+    filterExams();
+  </script>
+</body>
+</html>
