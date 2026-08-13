@@ -278,8 +278,19 @@ a { text-decoration: none; color: inherit; }
 
 .subject-card:hover {
   transform: translateY(-3px);
-  border-color: var(--color-primary);
+  border-color: var(--accent, var(--color-primary));
   box-shadow: var(--shadow-card);
+}
+
+.subject-card-icon {
+  font-size: 2rem;
+  line-height: 1;
+}
+
+.subject-card-name {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--accent, var(--color-ink));
 }
 
 .subject-icon {
