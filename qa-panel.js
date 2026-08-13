@@ -73,29 +73,17 @@
       border: none;
     }
 
-    /* 主內容區在面板開啟時縮到左側 2/3 */
+    /* 主內容區在面板開啟時縮到左側 2/3
+       用 padding-right 推擠 body，不動 margin，避免破壞 margin:auto 置中 */
+    body {
+      transition: padding-right 0.3s cubic-bezier(.4,0,.2,1);
+    }
     body.qa-open {
+      padding-right: 33.333%;
       overflow-x: hidden;
     }
-    body.qa-open .navbar,
-    body.qa-open main,
-    body.qa-open .page-header,
-    body.qa-open .container,
-    body.qa-open .writing-layout,
-    body.qa-open section,
-    body.qa-open > div:not(.qa-panel) {
-      margin-right: 33.333%;
-      transition: margin-right 0.3s cubic-bezier(.4,0,.2,1);
-    }
-    body:not(.qa-open) .navbar,
-    body:not(.qa-open) main,
-    body:not(.qa-open) .page-header,
-    body:not(.qa-open) .container,
-    body:not(.qa-open) .writing-layout,
-    body:not(.qa-open) section,
-    body:not(.qa-open) > div:not(.qa-panel) {
-      margin-right: 0;
-      transition: margin-right 0.3s cubic-bezier(.4,0,.2,1);
+    body:not(.qa-open) {
+      padding-right: 0;
     }
 
     /* Navbar 內的智慧問答按鈕樣式 */
