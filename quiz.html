@@ -28,15 +28,6 @@
     <!-- 設定區 -->
     <div class="quiz-settings" id="settingsBar">
       <div>
-        <label>難易度：</label>
-        <div class="difficulty-btns">
-          <button class="diff-btn easy active"   data-diff="easy"   onclick="setDifficulty('easy')">基礎</button>
-          <button class="diff-btn medium"         data-diff="medium" onclick="setDifficulty('medium')">進階</button>
-          <button class="diff-btn hard"           data-diff="hard"   onclick="setDifficulty('hard')">挑戰</button>
-          <button class="diff-btn"                data-diff="all"    onclick="setDifficulty('all')" style="background:#e2e8f0;color:#1e3a5f;border-color:#c0ccd8;">全部</button>
-        </div>
-      </div>
-      <div>
         <label for="qCount">題數：</label>
         <input type="number" id="qCount" value="5" min="1" max="20" style="width:60px;" />
       </div>
@@ -100,7 +91,7 @@
     // 從 URL 取得參數
     const params = new URLSearchParams(location.search);
     const subject = params.get('subject') || 'chinese';
-    let currentDifficulty = 'easy';
+    let currentDifficulty = 'all';
     let questions = [];
     let currentIndex = 0;
     let score = 0;
@@ -111,13 +102,6 @@
     document.getElementById('quizTitle').textContent = (SUBJECT_NAMES[subject] || subject) + ' 練習';
     document.getElementById('quizSubtitle').textContent = `${SUBJECT_NAMES[subject] || subject} — 調整難度後開始測驗`;
     document.title = (SUBJECT_NAMES[subject] || subject) + ' 練習 - 高中學習平台';
-
-    function setDifficulty(diff) {
-      currentDifficulty = diff;
-      document.querySelectorAll('.diff-btn').forEach(btn => {
-        btn.classList.toggle('active', btn.dataset.diff === diff);
-      });
-    }
 
     function startQuiz() {
       const count = parseInt(document.getElementById('qCount').value) || 5;
