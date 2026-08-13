@@ -55,6 +55,24 @@ async function mockAI() {
   return `【需要修正】\n我看到你的作答了！在你繼續之前，我想請你想想：這道題的第一步，你覺得應該先做什麼運算呢？試著把解題過程一步一步寫出來，會更容易找到問題所在喔！`;
 }
 
+// ── Bob (IBM Bob Inference API) Provider ─────────────────────────────────────
+async function bobAI(ocrText) {
+  const OpenAI = require('openai');
+  const client = new OpenAI({
+    apiKey: process.env.BOB_API_KEY,
+    baseURL: process.env.BOB_INFERENCE_URL, // 例如：https://<instance>.bob.ibm.com/v1
+  });
+
+  const completion = await client.chat.completions.create({
+    model: process.env.BOB_MODEL_ID || 'claude-sonnet-4-5',
+    messages: [{ role: 'user', content: buildPrompt(ocrText) }],
+    max_tokens: 512,
+    temperature: 0.7,
+  });
+
+  return completion.choices[0]?.message?.content || '（AI 沒有回應）';
+}
+
 // ── Groq Provider（文字模式，使用 OCR 結果）─────────────────────────────────
 async function groqAI(ocrText) {
   const Groq = require('groq-sdk');
@@ -79,14 +97,15 @@ async function watsonxAI(ocrText) {
     serviceUrl: process.env.WATSONX_URL,
   });
 
-  const response = await client.generateText({
-    modelId: 'ibm/granite-13b-instruct-v2',
+  const response = await client.textChat({
+    modelId: process.env.WATSONX_MODEL_ID || 'ibm/granite-3-2-8b-instruct',
     projectId: process.env.WATSONX_PROJECT_ID,
-    input: buildPrompt(ocrText),
-    parameters: { max_new_tokens: 512, temperature: 0.7 },
+    messages: [{ role: 'user', content: buildPrompt(ocrText) }],
+    maxTokens: 512,
+    temperature: 0.7,
   });
 
-  return response.result?.results?.[0]?.generated_text || '（AI 沒有回應）';
+  return response.result?.choices?.[0]?.message?.content || '（AI 沒有回應）';
 }
 
 // ── OpenAI Provider（支援 Vision 圖片輸入）──────────────────────────────────
@@ -152,6 +171,45 @@ async function chatAI(history) {
 請持續以 Socratic Method 引導學生思考，不要直接給出答案。
 回應請使用繁體中文，語氣親切友善。`;
 
+  if (provider === 'bob') {
+    const OpenAI = require('openai');
+    const client = new OpenAI({
+      apiKey: process.env.BOB_API_KEY,
+      baseURL: process.env.BOB_INFERENCE_URL,
+    });
+    const messages = [
+      { role: 'system', content: systemMsg },
+      ...history.map(m => ({ role: m.role === 'assistant' ? 'assistant' : 'user', content: m.content })),
+    ];
+    const completion = await client.chat.completions.create({
+      model: process.env.BOB_MODEL_ID || 'claude-sonnet-4-5',
+      messages,
+      max_tokens: 512,
+      temperature: 0.7,
+    });
+    return completion.choices[0]?.message?.content || '（AI 沒有回應）';
+  }
+
+  if (provider === 'watsonx') {
+    const { WatsonXAI } = require('@ibm-cloud/watsonx-ai');
+    const client = WatsonXAI.newInstance({
+      version: '2024-05-31',
+      serviceUrl: process.env.WATSONX_URL,
+    });
+    const messages = [
+      { role: 'system', content: systemMsg },
+      ...history.map(m => ({ role: m.role === 'assistant' ? 'assistant' : 'user', content: m.content })),
+    ];
+    const response = await client.textChat({
+      modelId: process.env.WATSONX_MODEL_ID || 'ibm/granite-3-2-8b-instruct',
+      projectId: process.env.WATSONX_PROJECT_ID,
+      messages,
+      maxTokens: 512,
+      temperature: 0.7,
+    });
+    return response.result?.choices?.[0]?.message?.content || '（AI 沒有回應）';
+  }
+
   if (provider === 'gemini') {
     const { GoogleGenerativeAI } = require('@google/generative-ai');
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
@@ -216,6 +274,8 @@ async function askAI(ocrText, base64Image, mimeType) {
   const provider = (process.env.AI_PROVIDER || 'mock').toLowerCase();
 
   switch (provider) {
+    case 'bob':
+      return await bobAI(ocrText);
     case 'groq':
       return await groqAI(ocrText);
     case 'watsonx':
