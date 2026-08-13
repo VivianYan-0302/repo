@@ -211,6 +211,22 @@ a { text-decoration: none; color: inherit; }
   padding: 0 1.5rem;
 }
 
+/* 5 個卡片：第一排 3 個，第二排 2 個置中 */
+.features-5 {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1.5rem;
+  max-width: 1080px;
+  margin: 3rem auto;
+  padding: 0 1.5rem;
+}
+
+.features-5 .feature-card {
+  flex: 0 0 calc(33.333% - 1rem);
+  max-width: calc(33.333% - 1rem);
+}
+
 .feature-card {
   background: var(--color-surface);
   border-radius: var(--radius-card);
@@ -807,6 +823,7 @@ footer {
   .navbar  { padding: 0 1rem; }
   .nav-links { gap: 1rem; }
   .features { padding: 0 1rem; grid-template-columns: 1fr 1fr; }
+  .features-5 .feature-card { flex: 0 0 calc(50% - 0.75rem); max-width: calc(50% - 0.75rem); }
   .subject-grid { grid-template-columns: repeat(3, 1fr); }
   .quiz-settings { flex-direction: column; align-items: flex-start; }
   .result-breakdown { gap: 1.5rem; }
@@ -819,6 +836,7 @@ footer {
   .nav-links a { font-size: 0.85rem; }
   .subject-grid { grid-template-columns: repeat(3, 1fr); }
   .features { grid-template-columns: 1fr; }
+  .features-5 .feature-card { flex: 0 0 100%; max-width: 100%; }
 }
 
 /* ------------------------------------------------------------
