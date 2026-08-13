@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI 學習公共平台｜評審簡報</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', 'PingFang TC', 'Microsoft JhengHei', sans-serif;
+    background: #f0f2f5;
+    color: #1f2328;
+  }
+  .nav {
+    position: fixed; top: 0; left: 0; right: 0;
+    background: #1e293b;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 10px 24px;
+    z-index: 100;
+  }
+  .nav-title { color: #e2e8f0; font-size: 0.9rem; }
+  .nav-btns { display: flex; gap: 8px; }
+  .nav-btns button {
+    background: #334155; color: #e2e8f0; border: none;
+    padding: 6px 14px; border-radius: 6px; cursor: pointer; font-size: 0.85rem;
+  }
+  .nav-btns button:hover { background: #475569; }
+  #page-indicator { color: #94a3b8; font-size: 0.85rem; }
+
+  .slides-wrapper {
+    padding-top: 56px;
+    display: flex; flex-direction: column; align-items: center; gap: 32px;
+    padding-bottom: 48px;
+  }
+  .slide {
+    width: 900px; min-height: 506px;
+    border-radius: 14px;
+    box-shadow: 0 4px 24px #0002;
+    position: relative;
+    display: flex; flex-direction: column;
+    padding: 52px 60px;
+    scroll-margin-top: 70px;
+  }
+  .slide-number {
+    position: absolute; top: 16px; right: 20px;
+    font-size: 0.8rem; color: #94a3b8;
+  }
+
+  /* 封面 */
+  .slide-cover {
+    background: linear-gradient(135deg, #1e3a5f 0%, #1e293b 60%, #0f172a 100%);
+    color: #fff;
+    justify-content: center; align-items: flex-start;
+  }
+  .slide-cover .tag {
+    background: #3b82f644; color: #93c5fd;
+    padding: 4px 12px; border-radius: 20px; font-size: 0.8rem;
+    margin-bottom: 24px; display: inline-block;
+  }
+  .slide-cover h1 { font-size: 2.4rem; font-weight: 700; line-height: 1.3; margin-bottom: 16px; }
+  .slide-cover .subtitle { font-size: 1.1rem; color: #94a3b8; margin-bottom: 40px; }
+  .slide-cover .team { font-size: 0.9rem; color: #64748b; border-top: 1px solid #334155; padding-top: 20px; }
+
+  /* 一般頁 */
+  .slide-normal { background: #ffffff; }
+  .slide-normal .slide-tag {
+    font-size: 0.75rem; color: #3b82f6; font-weight: 600;
+    letter-spacing: 1px; text-transform: uppercase; margin-bottom: 10px;
+  }
+  .slide-normal h2 { font-size: 1.6rem; font-weight: 700; margin-bottom: 8px; color: #0f172a; }
+  .slide-normal .lead { font-size: 1rem; color: #57606a; margin-bottom: 28px; font-style: italic; }
+
+  /* 空白頁 */
+  .slide-blank {
+    background: #f8fafc;
+    border: 2px dashed #cbd5e1;
+    justify-content: center; align-items: center;
+    color: #94a3b8;
+    font-size: 1.1rem;
+  }
+  .slide-blank .blank-icon { font-size: 2.5rem; margin-bottom: 12px; }
+
+  /* 表格 */
+  table { width: 100%; border-collapse: collapse; margin-top: 8px; }
+  th { background: #f1f5f9; color: #475569; font-size: 0.8rem; padding: 10px 14px; text-align: left; }
+  td { padding: 12px 14px; font-size: 0.9rem; border-bottom: 1px solid #f1f5f9; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: #f8fafc; }
+
+  /* 痛點卡片 */
+  .pain-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-top: 8px; }
+  .pain-card {
+    background: #f8fafc; border-radius: 10px; padding: 20px;
+    border-left: 4px solid;
+  }
+  .pain-card.red { border-color: #ef4444; }
+  .pain-card.orange { border-color: #f97316; }
+  .pain-card.yellow { border-color: #eab308; }
+  .pain-card .pain-icon { font-size: 1.5rem; margin-bottom: 8px; }
+  .pain-card h4 { font-size: 0.95rem; font-weight: 700; margin-bottom: 6px; }
+  .pain-card p { font-size: 0.82rem; color: #57606a; line-height: 1.5; }
+
+  /* 解法對應 */
+  .solution-grid { display: flex; flex-direction: column; gap: 14px; margin-top: 8px; }
+  .solution-row {
+    display: flex; align-items: center; gap: 16px;
+    background: #f8fafc; border-radius: 10px; padding: 16px 20px;
+  }
+  .solution-row .arrow { color: #3b82f6; font-size: 1.2rem; flex-shrink: 0; }
+  .solution-row .problem { flex: 1; font-size: 0.9rem; color: #57606a; }
+  .solution-row .solution { flex: 1.5; font-size: 0.9rem; font-weight: 600; color: #0f172a; }
+
+  /* 現有解法不足 */
+  .gap-box {
+    background: #eff6ff; border: 1px solid #bfdbfe;
+    border-radius: 10px; padding: 20px 24px; margin-top: 20px;
+  }
+  .gap-box h4 { font-size: 0.9rem; font-weight: 700; color: #1d4ed8; margin-bottom: 12px; }
+  .gap-list { display: flex; gap: 10px; flex-wrap: wrap; }
+  .gap-tag {
+    background: #fff; border: 1px solid #bfdbfe; color: #1d4ed8;
+    padding: 6px 14px; border-radius: 20px; font-size: 0.82rem;
+  }
+
+  /* 社會影響力 */
+  .impact-grid { display: flex; flex-direction: column; gap: 14px; margin-top: 8px; }
+  .impact-row {
+    background: #f8fafc; border-radius: 10px; padding: 16px 20px;
+    display: flex; gap: 16px; align-items: flex-start;
+  }
+  .impact-icon { font-size: 1.8rem; flex-shrink: 0; }
+  .impact-content h4 { font-size: 0.95rem; font-weight: 700; margin-bottom: 4px; }
+  .impact-content p { font-size: 0.85rem; color: #57606a; line-height: 1.5; }
+  .impact-quote {
+    margin-top: 20px; background: #1e293b; color: #e2e8f0;
+    border-radius: 10px; padding: 16px 24px; font-size: 0.95rem;
+    text-align: center; font-style: italic;
+  }
+
+  /* 結語 */
+  .slide-ending {
+    background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 100%);
+    color: #fff;
+    justify-content: center; align-items: center; text-align: center;
+  }
+  .slide-ending h2 { font-size: 2rem; font-weight: 700; margin-bottom: 16px; line-height: 1.4; }
+  .slide-ending p { font-size: 1rem; color: #94a3b8; margin-bottom: 32px; }
+  .slide-ending .cta {
+    background: #3b82f6; color: #fff;
+    padding: 12px 32px; border-radius: 8px; font-size: 1rem; font-weight: 600;
+    display: inline-block;
+  }
+</style>
+</head>
+<body>
+
+<div class="nav">
+  <div class="nav-title">📊 AI 學習公共平台｜評審簡報草稿</div>
+  <div id="page-indicator">10 頁</div>
+  <div class="nav-btns">
+    <button onclick="window.print()">🖨️ 列印</button>
+  </div>
+</div>
+
+<div class="slides-wrapper">
+
+  <!-- 第 1 頁：封面 -->
+  <div class="slide slide-cover" id="slide-1">
+    <div class="slide-number">01 / 10</div>
+    <div class="tag">2025 AI Hackathon</div>
+    <h1>AI 學習公共平台</h1>
+    <div class="subtitle">讓每一位高中生，都有一個懂他的學習夥伴</div>
+    <div class="team">團隊名稱　｜　指導老師　｜　2025</div>
+  </div>
+
+  <!-- 第 2 頁：問題與規模 -->
+  <div class="slide slide-normal" id="slide-2">
+    <div class="slide-number">02 / 10</div>
+    <div class="slide-tag">Problem</div>
+    <h2>高中生面臨的三大學習困境</h2>
+    <div class="lead">「對許多高中生來說，不是不想學，而是連『怎麼開口問』都不知道。」</div>
+    <div class="pain-grid">
+      <div class="pain-card red">
+        <div class="pain-icon">🔴</div>
+        <h4>不知道怎麼問</h4>
+        <p>數學符號、物理公式打不出來，也說不清楚自己卡在哪個步驟</p>
+      </div>
+      <div class="pain-card orange">
+        <div class="pain-icon">🟠</div>
+        <h4>學不下去</h4>
+        <p>只想要答案；提示太難聽不懂、太簡單覺得多餘，難以適配每個人</p>
+      </div>
+      <div class="pain-card yellow">
+        <div class="pain-icon">🟡</div>
+        <h4>資源不平等</h4>
+        <p>舊手機、低速網路、與家人共用設備，弱勢學生連進入門檻都難跨越</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 第 3 頁：現有解法的不足 -->
+  <div class="slide slide-normal" id="slide-3">
+    <div class="slide-number">03 / 10</div>
+    <div class="slide-tag">Gap</div>
+    <h2>現有工具，各有致命缺陷</h2>
+    <div class="lead">「現有工具不是太貴、就是太通用，或根本不懂台灣學生在考什麼。」</div>
+    <table>
+      <thead>
+        <tr><th>工具</th><th>問題所在</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>💬 ChatGPT / Gemini</td><td>通用 AI，不熟台灣課綱與考題脈絡，回答常偏離重點</td></tr>
+        <tr><td>📱 Photomath</td><td>只給答案、不引導思考，學完依然不會舉一反三</td></tr>
+        <tr><td>🏫 補習班 / 家教</td><td>費用高，非所有學生負擔得起</td></tr>
+        <tr><td>📺 均一平台 / YouTube</td><td>影片式學習，無法針對「這一題」即時互動問答</td></tr>
+      </tbody>
+    </table>
+    <div class="gap-box">
+      <h4>沒有任何工具同時做到這四件事 👇</h4>
+      <div class="gap-list">
+        <span class="gap-tag">✅ 熟悉台灣高中課綱與題庫</span>
+        <span class="gap-tag">✅ 拍照上傳，不需打字</span>
+        <span class="gap-tag">✅ AI 引導思考，不只給答案</span>
+        <span class="gap-tag">✅ 完全免費，人人可用</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 第 4 頁：我們的解法 -->
+  <div class="slide slide-normal" id="slide-4">
+    <div class="slide-number">04 / 10</div>
+    <div class="slide-tag">Solution</div>
+    <h2>我們的解法：一一對應每個痛點</h2>
+    <div class="lead">「這就是我們存在的理由。」</div>
+    <div class="solution-grid">
+      <div class="solution-row">
+        <div class="problem">🔴 不知道怎麼問</div>
+        <div class="arrow">→</div>
+        <div class="solution">📷 手機拍照上傳題目，不需打字描述</div>
+      </div>
+      <div class="solution-row">
+        <div class="problem">🟠 學不下去</div>
+        <div class="arrow">→</div>
+        <div class="solution">🤖 AI 引導式問答，依程度自動調整提示難度</div>
+      </div>
+      <div class="solution-row">
+        <div class="problem">🟡 資源不平等</div>
+        <div class="arrow">→</div>
+        <div class="solution">🌐 純網頁版，任何裝置開瀏覽器即用，完全免費</div>
+      </div>
+      <div class="solution-row">
+        <div class="problem">📚 台灣高中題庫</div>
+        <div class="arrow">→</div>
+        <div class="solution">🎯 專為台灣課綱設計，不是通用 AI 亂答</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 第 5 頁：Demo 展示（空白） -->
+  <div class="slide slide-blank" id="slide-5">
+    <div class="slide-number">05 / 10</div>
+    <div class="blank-icon">🎬</div>
+    <div><strong>Demo 展示</strong>（待補）</div>
+    <div style="font-size:0.85rem; margin-top:8px;">截圖 / GIF / 操作流程</div>
+  </div>
+
+  <!-- 第 6 頁：社會影響力 -->
+  <div class="slide slide-normal" id="slide-6">
+    <div class="slide-number">06 / 10</div>
+    <div class="slide-tag">Impact</div>
+    <h2>社會影響力</h2>
+    <div class="lead">「我們相信，學習資源的品質不應該由家庭收入決定。」</div>
+    <div class="impact-grid">
+      <div class="impact-row">
+        <div class="impact-icon">👤</div>
+        <div class="impact-content">
+          <h4>個人層：還給學生學習的主動權</h4>
+          <p>不再因「不知道怎麼問」而放棄；任何時間、地點都能即時獲得引導；從被動接受答案變成主動思考推導</p>
+        </div>
+      </div>
+      <div class="impact-row">
+        <div class="impact-icon">🏫</div>
+        <div class="impact-content">
+          <h4>社會層：縮小城鄉與貧富的學習落差</h4>
+          <p>免費使用消除經濟門檻；舊手機也能用；讓偏鄉、弱勢學生享有與都市學生相同的學習資源</p>
+        </div>
+      </div>
+      <div class="impact-row">
+        <div class="impact-icon">🇹🇼</div>
+        <div class="impact-content">
+          <h4>國家層：為台灣培養具備 AI 素養的下一代</h4>
+          <p>學生從高中開始習慣與 AI 協作學習；建立「問對問題」的思維能力；為台灣未來人才競爭力打基礎</p>
+        </div>
+      </div>
+    </div>
+    <div class="impact-quote">「我們不只是在做一個學習工具，我們在做一件公平的事。」</div>
+  </div>
+
+  <!-- 第 7 頁：技術架構（空白） -->
+  <div class="slide slide-blank" id="slide-7">
+    <div class="slide-number">07 / 10</div>
+    <div class="blank-icon">⚙️</div>
+    <div><strong>技術架構</strong>（待補）</div>
+    <div style="font-size:0.85rem; margin-top:8px;">架構圖 / 技術堆疊</div>
+  </div>
+
+  <!-- 第 8 頁：團隊分工（空白） -->
+  <div class="slide slide-blank" id="slide-8">
+    <div class="slide-number">08 / 10</div>
+    <div class="blank-icon">👥</div>
+    <div><strong>團隊分工</strong>（待補）</div>
+    <div style="font-size:0.85rem; margin-top:8px;">每位成員的角色與貢獻</div>
+  </div>
+
+  <!-- 第 9 頁：未來規劃（空白） -->
+  <div class="slide slide-blank" id="slide-9">
+    <div class="slide-number">09 / 10</div>
+    <div class="blank-icon">🗺️</div>
+    <div><strong>未來規劃</strong>（待補）</div>
+    <div style="font-size:0.85rem; margin-top:8px;">3 個月 / 1 年 / 3 年目標</div>
+  </div>
+
+  <!-- 第 10 頁：結語 -->
+  <div class="slide slide-ending" id="slide-10">
+    <div class="slide-number" style="color:#475569;">10 / 10</div>
+    <h2>每一位高中生，<br>都值得一個懂他的學習夥伴。</h2>
+    <p>從今天開始，這件事不再只是理想。</p>
+    <div class="cta">感謝評審聆聽</div>
+  </div>
+
+</div>
+</body>
+</html>
