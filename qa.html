@@ -5,19 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>智慧問答 — 高中學習平台</title>
   <link rel="stylesheet" href="css/style.css" />
-  <style>
-    .qa-wrapper {
-      display: flex;
-      flex-direction: column;
-      height: calc(100vh - 64px);
-    }
-    .qa-iframe {
-      flex: 1;
-      width: 100%;
-      border: none;
-      display: block;
-    }
-  </style>
 </head>
 <body>
   <nav class="navbar">
@@ -32,13 +19,31 @@
     </ul>
   </nav>
 
-  <div class="qa-wrapper">
-    <iframe
-      class="qa-iframe"
-      src="https://repo-1-jh0q.onrender.com/"
-      title="智慧問答"
-      allow="clipboard-write"
-    ></iframe>
+  <div class="page-header">
+    <h1>🤖 智慧問答</h1>
+    <p>有任何學習問題？隨時提問，支援文字與截圖</p>
   </div>
+
+  <div class="container" style="text-align:center; padding: 3rem 1rem;">
+    <p style="font-size:1.05rem; color: var(--color-ink-muted); margin-bottom: 1.5rem;">
+      點擊下方按鈕開啟側邊問答視窗，不會離開目前頁面。
+    </p>
+    <button onclick="document.querySelector('.nav-qa-btn').click()"
+      style="background: var(--color-primary); color: #fff; border: none; border-radius: 10px;
+             padding: 0.75rem 2rem; font-size: 1rem; cursor: pointer; font-family: inherit;">
+      開啟智慧問答 →
+    </button>
+  </div>
+
+  <script src="qa-panel.js"></script>
+  <script>
+    // 進入此頁面時自動開啟面板
+    document.addEventListener('DOMContentLoaded', function () {
+      setTimeout(function () {
+        var btn = document.querySelector('.nav-qa-btn');
+        if (btn) btn.click();
+      }, 100);
+    });
+  </script>
 </body>
 </html>
