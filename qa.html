@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>智慧問答 — 高中學習平台</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <style>
+    .qa-wrapper {
+      display: flex;
+      flex-direction: column;
+      height: calc(100vh - 64px);
+    }
+    .qa-iframe {
+      flex: 1;
+      width: 100%;
+      border: none;
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <nav class="navbar">
+    <div class="nav-brand">📚 高中學習平台</div>
+    <ul class="nav-links">
+      <li><a href="index.html">首頁</a></li>
+      <li><a href="subjects.html">科目複習</a></li>
+      <li><a href="exam.html">學測考古題</a></li>
+      <li><a href="writing.html">作文練習</a></li>
+      <li><a href="record.html">學習記錄</a></li>
+      <li><a href="qa.html" class="active">智慧問答</a></li>
+    </ul>
+  </nav>
+
+  <div class="qa-wrapper">
+    <iframe
+      class="qa-iframe"
+      src="https://repo-1-jh0q.onrender.com/"
+      title="智慧問答"
+      allow="clipboard-write"
+    ></iframe>
+  </div>
+</body>
+</html>
