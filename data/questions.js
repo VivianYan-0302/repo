@@ -74,14 +74,55 @@ const QUESTION_BANK = {
   ],
 
   exam_gaokao: [
-    { id:"ex1", year:2023, subject:"國文", difficulty:"medium", text:"（108課綱學測）閱讀下文，回答問題：「天下皆知美之為美，斯惡已；皆知善之為善，斯不善已。」此段出自？", options:["《論語》","《孟子》","《道德經》","《莊子》"], answer:2, explanation:"此段出自老子《道德經》第二章，說明美醜、善惡是相對的概念。" },
-    { id:"ex2", year:2023, subject:"英文", difficulty:"medium", text:"（學測英文）Choose the best answer: The scientist's experiment was ___; it produced results that no one had expected.", options:["conventional","groundbreaking","redundant","trivial"], answer:1, explanation:"\"groundbreaking\" means innovative and pioneering, which fits the context of unexpected results." },
-    { id:"ex3", year:2022, subject:"數學", difficulty:"hard", text:"（學測數學）設 a, b 為正整數，且 a + b = 10，則 ab 的最大值為？", options:["21","24","25","30"], answer:2, explanation:"由 AM-GM 不等式，當 a = b = 5 時，ab 有最大值 5×5 = 25。" },
-    { id:"ex4", year:2022, subject:"自然", difficulty:"medium", text:"（學測自然）下列哪個物理量的單位是「帕斯卡（Pa）」？", options:["能量","壓力","力","速度"], answer:1, explanation:"帕斯卡（Pascal, Pa）是壓力的SI單位，等於每平方公尺施加1牛頓的力（N/m²）。" },
-    { id:"ex5", year:2021, subject:"社會", difficulty:"medium", text:"（學測社會）聯合國《世界人權宣言》於哪一年通過？", options:["1945年","1946年","1948年","1950年"], answer:2, explanation:"聯合國《世界人權宣言》於1948年12月10日通過，確立了基本人權的普世標準。" },
-    { id:"ex6", year:2021, subject:"國文", difficulty:"hard", text:"（學測國文）「吾十有五而志於學，三十而立，四十而不惑，五十而知天命，六十而耳順，七十而從心所欲，不踰矩。」此段出自？", options:["《孟子》","《論語》","《中庸》","《大學》"], answer:1, explanation:"此段出自《論語·為政篇》，是孔子自述一生學習修養的歷程。" },
-    { id:"ex7", year:2020, subject:"英文", difficulty:"hard", text:"（學測英文）The phrase \"turn over a new leaf\" means:", options:["to change one's behavior for the better","to literally turn a page","to start a new book","to ignore past mistakes"], answer:0, explanation:"\"Turn over a new leaf\" is an idiom meaning to start behaving in a better or more responsible way." },
-    { id:"ex8", year:2020, subject:"數學", difficulty:"hard", text:"（學測數學）若 log₂8 = x，則 x = ？", options:["2","3","4","8"], answer:1, explanation:"log₂8 = log₂(2³) = 3，因為 2³ = 8。" },
+    // ===== 國文 =====
+    { id:"ex_c1", year:2023, subject:"國文", difficulty:"medium", text:"「天下皆知美之為美，斯惡已；皆知善之為善，斯不善已。」此段出自？", options:["《論語》","《孟子》","《道德經》","《莊子》"], answer:2, explanation:"此段出自老子《道德經》第二章，說明美醜、善惡是相對的概念。" },
+    { id:"ex_c2", year:2021, subject:"國文", difficulty:"hard", text:"「吾十有五而志於學，三十而立，四十而不惑，五十而知天命，六十而耳順，七十而從心所欲，不踰矩。」此段出自？", options:["《孟子》","《論語》","《中庸》","《大學》"], answer:1, explanation:"此段出自《論語·為政篇》，是孔子自述一生學習修養的歷程。" },
+    { id:"ex_c3", year:2022, subject:"國文", difficulty:"medium", text:"「先天下之憂而憂，後天下之樂而樂」出自哪篇文章？", options:["《師說》","《出師表》","《岳陽樓記》","《赤壁賦》"], answer:2, explanation:"此句出自北宋范仲淹的《岳陽樓記》，表達了憂國憂民、以天下為己任的高尚情操。" },
+    { id:"ex_c4", year:2020, subject:"國文", difficulty:"easy", text:"「床前明月光，疑是地上霜」的作者是？", options:["杜甫","王維","李白","孟浩然"], answer:2, explanation:"此句出自唐代詩人李白的《靜夜思》，描寫遊子思鄉之情。" },
+    { id:"ex_c5", year:2023, subject:"國文", difficulty:"hard", text:"下列哪個文言虛詞「而」是表示「轉折」的用法？", options:["學而時習之","任重而道遠","人不知而不慍","吾日三省吾身"], answer:2, explanation:"「人不知而不慍」中的「而」表示轉折（但是、卻），意為「別人不了解我，我卻不生氣」。" },
+    { id:"ex_c6", year:2022, subject:"國文", difficulty:"medium", text:"《桃花源記》的作者是哪個朝代的人？", options:["唐代","宋代","東晉","明代"], answer:2, explanation:"《桃花源記》作者陶淵明（陶潛）是東晉時代的著名詩人，以田園詩著稱。" },
+    { id:"ex_c7", year:2021, subject:"國文", difficulty:"easy", text:"「山重水複疑無路，柳暗花明又一村」出自哪位詩人？", options:["陸游","蘇軾","辛棄疾","杜甫"], answer:0, explanation:"此句出自南宋陸游的《遊山西村》，比喻在困境中出現轉機。" },
+    { id:"ex_c8", year:2020, subject:"國文", difficulty:"hard", text:"下列哪一項不是「論語」的體裁特徵？", options:["語錄體","記載孔子及弟子言行","四書之一","敘事完整的長篇散文"], answer:3, explanation:"《論語》是語錄體散文，記載孔子及弟子言行，篇幅短小，不是敘事完整的長篇散文。" },
+
+    // ===== 英文 =====
+    { id:"ex_e1", year:2023, subject:"英文", difficulty:"medium", text:"Choose the best answer: The scientist's experiment was ___; it produced results that no one had expected.", options:["conventional","groundbreaking","redundant","trivial"], answer:1, explanation:"\"groundbreaking\" means innovative and pioneering, which fits the context of unexpected results." },
+    { id:"ex_e2", year:2020, subject:"英文", difficulty:"hard", text:"The phrase \"turn over a new leaf\" means:", options:["to change one's behavior for the better","to literally turn a page","to start a new book","to ignore past mistakes"], answer:0, explanation:"\"Turn over a new leaf\" is an idiom meaning to start behaving in a better or more responsible way." },
+    { id:"ex_e3", year:2022, subject:"英文", difficulty:"medium", text:"Choose the correct form: She ___ to the gym every day before she got injured.", options:["goes","went","has gone","will go"], answer:1, explanation:"過去習慣用過去式 \"went\"，表示過去規律性的動作（在受傷之前）。" },
+    { id:"ex_e4", year:2021, subject:"英文", difficulty:"easy", text:"Which word means the opposite of \"ancient\"?", options:["old","historic","modern","traditional"], answer:2, explanation:"\"modern\" means contemporary or new, which is the opposite of \"ancient\" (very old)." },
+    { id:"ex_e5", year:2023, subject:"英文", difficulty:"hard", text:"___ he studied hard, he failed the exam.", options:["Because","Although","Since","Unless"], answer:1, explanation:"\"Although\" introduces a contrast/concession clause, meaning 'despite the fact that he studied hard, he still failed'." },
+    { id:"ex_e6", year:2022, subject:"英文", difficulty:"medium", text:"The word \"meticulous\" most closely means:", options:["careless","showing great attention to detail","very fast","generous"], answer:1, explanation:"\"Meticulous\" means showing great attention to detail, being very careful and precise." },
+    { id:"ex_e7", year:2021, subject:"英文", difficulty:"easy", text:"Choose the correct preposition: She is very good ___ playing the piano.", options:["in","on","at","for"], answer:2, explanation:"\"good at\" is the correct collocation when describing someone's skill or ability in an activity." },
+    { id:"ex_e8", year:2020, subject:"英文", difficulty:"hard", text:"The passive voice of \"The teacher will explain the rules\" is:", options:["The rules will be explained by the teacher","The rules are explained by the teacher","The teacher is explaining the rules","The rules were explained by the teacher"], answer:0, explanation:"未來式主動 → 未來式被動：will + be + past participle。\"The rules will be explained by the teacher.\"" },
+
+    // ===== 數學 =====
+    { id:"ex_m1", year:2022, subject:"數學", difficulty:"hard", text:"設 a, b 為正整數，且 a + b = 10，則 ab 的最大值為？", options:["21","24","25","30"], answer:2, explanation:"由 AM-GM 不等式，當 a = b = 5 時，ab 有最大值 5×5 = 25。" },
+    { id:"ex_m2", year:2020, subject:"數學", difficulty:"hard", text:"若 log₂8 = x，則 x = ？", options:["2","3","4","8"], answer:1, explanation:"log₂8 = log₂(2³) = 3，因為 2³ = 8。" },
+    { id:"ex_m3", year:2023, subject:"數學", difficulty:"medium", text:"等差數列首項為 2，公差為 3，則第 10 項為？", options:["27","29","32","30"], answer:1, explanation:"等差數列第 n 項 = a₁ + (n-1)d = 2 + (10-1)×3 = 2 + 27 = 29。" },
+    { id:"ex_m4", year:2021, subject:"數學", difficulty:"easy", text:"一個正六邊形的內角和為？", options:["540°","600°","720°","900°"], answer:2, explanation:"多邊形內角和 = (n-2)×180°，六邊形 = (6-2)×180° = 720°。" },
+    { id:"ex_m5", year:2022, subject:"數學", difficulty:"medium", text:"若 f(x) = x² - 2x + 1，則 f(3) = ？", options:["2","4","6","8"], answer:1, explanation:"f(3) = 3² - 2×3 + 1 = 9 - 6 + 1 = 4。" },
+    { id:"ex_m6", year:2020, subject:"數學", difficulty:"hard", text:"從 5 個不同顏色的球中取 3 個，有幾種取法？", options:["10","15","20","60"], answer:0, explanation:"組合 C(5,3) = 5!/(3!×2!) = (5×4)/(2×1) = 10 種。" },
+    { id:"ex_m7", year:2023, subject:"數學", difficulty:"medium", text:"圓方程式 x² + y² = 25 的半徑為？", options:["5","10","25","√5"], answer:0, explanation:"標準圓方程式 x² + y² = r²，對照得 r² = 25，故 r = 5。" },
+    { id:"ex_m8", year:2021, subject:"數學", difficulty:"hard", text:"sin30° × cos60° + cos30° × sin60° = ？", options:["0","1/2","√3/2","1"], answer:3, explanation:"此為 sin(30°+60°) = sin90° = 1，應用和角公式 sin(A+B) = sinAcosB + cosAsinB。" },
+
+    // ===== 自然（物理＋化學＋生物）=====
+    { id:"ex_n1", year:2022, subject:"自然", difficulty:"medium", text:"下列哪個物理量的單位是「帕斯卡（Pa）」？", options:["能量","壓力","力","速度"], answer:1, explanation:"帕斯卡（Pascal, Pa）是壓力的SI單位，等於每平方公尺施加1牛頓的力（N/m²）。" },
+    { id:"ex_n2", year:2023, subject:"自然", difficulty:"easy", text:"光合作用的主要場所是細胞中的？", options:["粒線體","核糖體","葉綠體","細胞核"], answer:2, explanation:"葉綠體是植物進行光合作用的場所，含有葉綠素，可吸收光能。" },
+    { id:"ex_n3", year:2021, subject:"自然", difficulty:"medium", text:"下列何者為酸性物質？", options:["氫氧化鈉（NaOH）","碳酸氫鈉（NaHCO₃）","鹽酸（HCl）","氨水（NH₃）"], answer:2, explanation:"鹽酸（HCl）是強酸，溶於水會完全解離出氫離子（H⁺），pH < 7。" },
+    { id:"ex_n4", year:2020, subject:"自然", difficulty:"hard", text:"在密閉容器中，一定質量的理想氣體，溫度不變而體積縮小一半，壓力變為原來的？", options:["1/2倍","2倍","4倍","不變"], answer:1, explanation:"由波以耳定律（Boyle's Law）PV = 常數（溫度固定），體積縮半則壓力加倍。" },
+    { id:"ex_n5", year:2023, subject:"自然", difficulty:"medium", text:"DNA 複製遵循的原則是？", options:["全保留複製","半保留複製","分散複製","隨機複製"], answer:1, explanation:"DNA 採半保留複製（Semiconservative Replication），複製後每條新 DNA 含有一條原有鏈和一條新合成鏈。" },
+    { id:"ex_n6", year:2022, subject:"自然", difficulty:"hard", text:"電流通過導體時，其電阻與下列哪項因素無關？", options:["導體的材質","導體的長度","導體的截面積","通過的電流大小"], answer:3, explanation:"電阻 R = ρL/A，由材質（電阻率ρ）、長度（L）、截面積（A）決定，與通過的電流大小無關。" },
+    { id:"ex_n7", year:2021, subject:"自然", difficulty:"easy", text:"下列哪個是化學變化？", options:["冰融化成水","鹽溶於水","鐵生鏽","玻璃破碎"], answer:2, explanation:"鐵生鏽（氧化反應）是化學變化，生成了新物質（氧化鐵）；其他三者為物理變化。" },
+    { id:"ex_n8", year:2020, subject:"自然", difficulty:"medium", text:"人體消化澱粉的酵素是？", options:["蛋白酶","脂肪酶","澱粉酶","纖維素酶"], answer:2, explanation:"澱粉酶（Amylase）由唾液腺和胰腺分泌，負責將澱粉分解為麥芽糖和葡萄糖。" },
+
+    // ===== 社會（歷史＋地理＋公民）=====
+    { id:"ex_s1", year:2021, subject:"社會", difficulty:"medium", text:"聯合國《世界人權宣言》於哪一年通過？", options:["1945年","1946年","1948年","1950年"], answer:2, explanation:"聯合國《世界人權宣言》於1948年12月10日通過，確立了基本人權的普世標準。" },
+    { id:"ex_s2", year:2023, subject:"社會", difficulty:"easy", text:"台灣的北回歸線橫貫哪個縣市附近？", options:["台中","嘉義","台南","彰化"], answer:1, explanation:"北回歸線（北緯23.5°）通過嘉義縣及花蓮縣，嘉義市設有北回歸線標誌。" },
+    { id:"ex_s3", year:2022, subject:"社會", difficulty:"medium", text:"下列哪個事件標誌著冷戰的結束？", options:["韓戰結束","越戰結束","蘇聯解體","柏林圍牆建立"], answer:2, explanation:"1991年蘇聯解體，標誌著冷戰（Cold War）正式結束，美蘇兩極對立的格局消失。" },
+    { id:"ex_s4", year:2020, subject:"社會", difficulty:"hard", text:"中華民國憲法規定，立法委員任期為幾年？", options:["3年","4年","5年","6年"], answer:1, explanation:"依中華民國憲法增修條文，立法委員任期為4年，得連選連任。" },
+    { id:"ex_s5", year:2023, subject:"社會", difficulty:"medium", text:"「絲路」連接了古代中國與哪個地區的貿易往來？", options:["非洲","中亞與歐洲","東南亞","南美洲"], answer:1, explanation:"古代絲路（Silk Road）連接中國與中亞、西亞乃至歐洲，是重要的貿易與文化交流通道。" },
+    { id:"ex_s6", year:2022, subject:"社會", difficulty:"easy", text:"台灣地形以哪種地形為主？", options:["平原","高原","山地與丘陵","盆地"], answer:2, explanation:"台灣地形約2/3為山地與丘陵，以中央山脈為脊樑，平原主要分布於西部沿岸。" },
+    { id:"ex_s7", year:2021, subject:"社會", difficulty:"hard", text:"下列哪項是「外部性（Externality）」的例子？", options:["工廠生產商品獲利","消費者購買商品","工廠排放廢水污染河川","政府課徵所得稅"], answer:2, explanation:"外部性指經濟活動對第三方造成未計入市場價格的影響。工廠排放廢水污染河川是「負外部性」的典型例子。" },
+    { id:"ex_s8", year:2020, subject:"社會", difficulty:"medium", text:"鄭成功驅逐荷蘭人、收復台灣是在哪一年？", options:["1624年","1661年","1683年","1895年"], answer:1, explanation:"1661年鄭成功率軍登陸台灣，1662年迫使荷蘭東印度公司投降，結束荷蘭在台38年的統治。" },
   ]
 };
 
@@ -91,7 +132,6 @@ function getQuestions(subject, difficulty = "all", count = 10) {
   if (difficulty !== "all") {
     pool = pool.filter(q => q.difficulty === difficulty);
   }
-  // 隨機取樣
   const shuffled = [...pool].sort(() => Math.random() - 0.5);
   return shuffled.slice(0, Math.min(count, shuffled.length));
 }
