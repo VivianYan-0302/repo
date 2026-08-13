@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI 解題引導平台</title>
+  <link rel="stylesheet" href="style.css" />
+  <!-- MathJax：渲染數學公式 -->
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] },
+      options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" async></script>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>📚 AI 解題引導平台</h1>
+      <p class="subtitle">上傳作業或考卷圖片，AI 老師幫你一步步理解題目</p>
+    </header>
+
+    <main>
+      <!-- 上傳區塊 -->
+      <section class="upload-section">
+        <div class="upload-area" id="uploadArea">
+          <div class="upload-icon">🖼️</div>
+          <p>點擊或拖曳圖片到此處</p>
+          <p class="upload-hint">支援 JPG、PNG，檔案大小上限 10MB</p>
+          <input type="file" id="fileInput" accept="image/jpeg,image/png" hidden />
+        </div>
+
+        <!-- 圖片預覽 -->
+        <div class="preview-area" id="previewArea" style="display:none;">
+          <img id="previewImg" src="" alt="預覽圖片" />
+          <button class="btn-clear" id="clearBtn">✕ 移除</button>
+        </div>
+
+        <button class="btn-submit" id="submitBtn" disabled>
+          🔍 開始分析
+        </button>
+      </section>
+
+      <!-- 結果區塊 -->
+      <section class="result-section" id="resultSection" style="display:none;">
+        <div class="result-card">
+          <h2>📖 辨識內容</h2>
+          <pre id="ocrText" class="ocr-text"></pre>
+        </div>
+
+        <!-- 對話記錄 -->
+        <div class="result-card ai-card">
+          <h2>🤖 AI 老師的引導</h2>
+          <div id="chatHistory" class="chat-history"></div>
+
+          <!-- 學生回覆輸入框 -->
+          <div class="chat-input-area" id="chatInputArea" style="display:none;">
+            <textarea id="studentInput" class="student-input" placeholder="輸入你的想法或回答…" rows="3"></textarea>
+            <button class="btn-reply" id="replyBtn">送出回答 ➤</button>
+          </div>
+          <div class="chat-loading" id="chatLoading" style="display:none;">
+            <span class="dot-flashing"></span> AI 老師思考中…
+          </div>
+        </div>
+      </section>
+
+      <!-- 載入中 -->
+      <div class="loading" id="loading" style="display:none;">
+        <div class="spinner"></div>
+        <p>正在辨識圖片並分析題目，請稍候…</p>
+      </div>
+
+      <!-- 錯誤訊息 -->
+      <div class="error-msg" id="errorMsg" style="display:none;"></div>
+    </main>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

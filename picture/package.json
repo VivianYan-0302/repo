@@ -1,0 +1,33 @@
+{
+  "name": "ai-tutor-platform",
+  "version": "1.0.0",
+  "description": "高中生 AI 解題引導平台 MVP",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/VivianYan-0302/repo.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/VivianYan-0302/repo/issues"
+  },
+  "homepage": "https://github.com/VivianYan-0302/repo#readme",
+  "dependencies": {
+    "@google/generative-ai": "^0.24.1",
+    "@ibm-cloud/watsonx-ai": "^1.7.16",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "groq-sdk": "^1.5.0",
+    "multer": "^2.2.0",
+    "openai": "^7.4.0",
+    "sharp": "^0.35.3",
+    "tesseract.js": "^7.0.0"
+  }
+}
