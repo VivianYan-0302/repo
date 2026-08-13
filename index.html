@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>AI 問答助理</title>
+
+<!-- Markdown renderer -->
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<!-- MathJax for LaTeX math rendering -->
+<script>
+  window.MathJax = {
+    tex: { inlineMath: [['$','$'],['\\(','\\)']], displayMath: [['$$','$$'],['\\[','\\]']] },
+    options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] }
+  };
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" async></script>
+
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, "Segoe UI", system-ui, sans-serif;
+    background: #0f0f11;
+    color: #e8e8ed;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  header {
+    width: 100%;
+    max-width: 860px;
+    padding: 32px 24px 0;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  header h1 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+
+  .badge {
+    font-size: 0.7rem;
+    background: #3b82d4;
+    color: #fff;
+    border-radius: 6px;
+    padding: 2px 8px;
+    font-weight: 600;
+  }
+
+  /* ── Chat history ────────────────────────── */
+  #history {
+    width: 100%;
+    max-width: 860px;
+    flex: 1;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    overflow-y: auto;
+  }
+
+  .msg {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    max-width: 80%;
+  }
+
+  .msg.user { align-self: flex-end; align-items: flex-end; }
+  .msg.ai   { align-self: flex-start; align-items: flex-start; }
+
+  .bubble {
+    padding: 12px 16px;
+    border-radius: 16px;
+    line-height: 1.65;
+    font-size: 0.95rem;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+
+  .msg.user .bubble { background: #3b82d4; color: #fff; border-bottom-right-radius: 4px; }
+  .msg.ai   .bubble { background: #1e1e24; border: 1px solid #2a2a35; border-bottom-left-radius: 4px; }
+
+  .msg .meta {
+    font-size: 0.72rem;
+    color: #57606a;
+  }
+
+  .msg.user .meta { text-align: right; }
+
+  .img-preview {
+    max-width: 240px;
+    max-height: 180px;
+    border-radius: 10px;
+    border: 1px solid #2a2a35;
+    object-fit: cover;
+  }
+
+  /* ── Thinking animation ──────────────────── */
+  .thinking .bubble::after {
+    content: '';
+    display: inline-block;
+    width: 6px; height: 6px;
+    background: #57606a;
+    border-radius: 50%;
+    margin-left: 6px;
+    animation: blink 1s infinite;
+    vertical-align: middle;
+  }
+  @keyframes blink { 0%,80%,100%{opacity:0} 40%{opacity:1} }
+
+  /* ── Input area ──────────────────────────── */
+  #input-area {
+    width: 100%;
+    max-width: 860px;
+    padding: 16px 24px 28px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  #paste-zone {
+    border: 2px dashed #2a2a35;
+    border-radius: 12px;
+    padding: 14px 16px;
+    font-size: 0.85rem;
+    color: #57606a;
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 56px;
+  }
+
+  #paste-zone.has-image {
+    border-color: #3b82d4;
+    background: #101826;
+    color: #e8e8ed;
+  }
+
+  #paste-zone:hover { border-color: #3b82d4; }
+
+  #paste-zone .thumb {
+    width: 44px;
+    height: 44px;
+    border-radius: 6px;
+    object-fit: cover;
+    flex-shrink: 0;
+  }
+
+  #clear-img {
+    margin-left: auto;
+    background: none;
+    border: none;
+    color: #57606a;
+    cursor: pointer;
+    font-size: 1.1rem;
+    padding: 4px 8px;
+    border-radius: 6px;
+    transition: background 0.15s;
+  }
+  #clear-img:hover { background: #2a2a35; color: #e8e8ed; }
+
+  #file-input { display: none; }
+
+  .row {
+    display: flex;
+    gap: 8px;
+    align-items: flex-end;
+  }
+
+  #question {
+    flex: 1;
+    background: #1e1e24;
+    border: 1px solid #2a2a35;
+    border-radius: 12px;
+    padding: 12px 16px;
+    font-size: 0.95rem;
+    color: #e8e8ed;
+    resize: none;
+    min-height: 48px;
+    max-height: 160px;
+    outline: none;
+    font-family: inherit;
+    transition: border-color 0.2s;
+    line-height: 1.5;
+  }
+
+  #question:focus { border-color: #3b82d4; }
+  #question::placeholder { color: #57606a; }
+
+  #send-btn {
+    background: #3b82d4;
+    color: #fff;
+    border: none;
+    border-radius: 12px;
+    padding: 0 20px;
+    height: 48px;
+    font-size: 1rem;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background 0.15s, transform 0.1s;
+    white-space: nowrap;
+  }
+
+  #send-btn:hover { background: #2563b0; }
+  #send-btn:active { transform: scale(0.97); }
+  #send-btn:disabled { background: #2a2a35; cursor: not-allowed; }
+
+  .hint {
+    font-size: 0.75rem;
+    color: #57606a;
+    text-align: center;
+  }
+
+  /* ── Empty state ─────────────────────────── */
+  #empty {
+    text-align: center;
+    color: #57606a;
+    padding: 60px 24px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+  }
+
+  #empty h2 { font-size: 1.2rem; color: #8b8ba0; }
+  #empty p  { font-size: 0.88rem; max-width: 360px; line-height: 1.6; }
+
+  /* ── Markdown content inside bubble ─── */
+  .bubble.md p  { margin: 0.4em 0; }
+  .bubble.md p:first-child { margin-top: 0; }
+  .bubble.md p:last-child  { margin-bottom: 0; }
+  .bubble.md ul, .bubble.md ol { padding-left: 1.4em; margin: 0.4em 0; }
+  .bubble.md li { margin: 0.2em 0; }
+  .bubble.md code { background: #2a2a35; border-radius: 4px; padding: 1px 5px; font-size: 0.88em; }
+  .bubble.md pre  { background: #2a2a35; border-radius: 8px; padding: 10px 14px; overflow-x: auto; margin: 0.5em 0; }
+  .bubble.md pre code { background: none; padding: 0; }
+  .bubble.md h1, .bubble.md h2, .bubble.md h3 { margin: 0.6em 0 0.3em; font-weight: 600; }
+  .bubble.md strong { font-weight: 700; }
+  .bubble.md blockquote { border-left: 3px solid #3b82d4; margin: 0.4em 0; padding-left: 10px; color: #a0aab4; }
+  .bubble.md table { border-collapse: collapse; width: 100%; margin: 0.5em 0; }
+  .bubble.md th, .bubble.md td { border: 1px solid #2a2a35; padding: 5px 10px; }
+  .bubble.md th { background: #2a2a35; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🤖 AI 問答助理</h1>
+  <span class="badge" id="provider-badge">Gemini</span>
+</header>
+
+<div id="history">
+  <div id="empty">
+    <h2>你好！有什麼問題嗎？</h2>
+    <p>可以直接輸入文字，或貼上（Ctrl+V）/ 上傳截圖一起問。</p>
+  </div>
+</div>
+
+<div id="input-area">
+  <!-- Image drop / paste zone -->
+  <div id="paste-zone" title="點擊上傳或直接按 Ctrl+V 貼上截圖">
+    <span id="paste-hint">📎 點擊選擇圖片，或按 Ctrl+V 貼上截圖</span>
+    <img id="img-thumb" class="thumb" style="display:none" src="" alt="preview" />
+    <button id="clear-img" style="display:none" title="移除圖片">✕</button>
+    <input type="file" id="file-input" accept="image/*" />
+  </div>
+
+  <div class="row">
+    <textarea id="question" rows="1" placeholder="輸入你的問題…" autofocus></textarea>
+    <button id="send-btn">送出</button>
+  </div>
+  <p class="hint">Enter 換行 · Ctrl+Enter 送出</p>
+</div>
+
+<script>
+  let imageB64 = null;
+
+  // ── Image handling ─────────────────────────────
+  const pasteZone  = document.getElementById('paste-zone');
+  const fileInput  = document.getElementById('file-input');
+  const imgThumb   = document.getElementById('img-thumb');
+  const pasteHint  = document.getElementById('paste-hint');
+  const clearBtn   = document.getElementById('clear-img');
+
+  pasteZone.addEventListener('click', () => fileInput.click());
+
+  fileInput.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (file) loadImageFile(file);
+  });
+
+  document.addEventListener('paste', (e) => {
+    const items = e.clipboardData?.items;
+    if (!items) return;
+    for (const item of items) {
+      if (item.type.startsWith('image/')) {
+        loadImageFile(item.getAsFile());
+        break;
+      }
+    }
+  });
+
+  clearBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    clearImage();
+  });
+
+  function loadImageFile(file) {
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      const dataUrl = ev.target.result;
+      imageB64 = dataUrl.split(',')[1];
+      imgThumb.src = dataUrl;
+      imgThumb.style.display = '';
+      pasteHint.textContent = file.name || '已載入圖片';
+      clearBtn.style.display = '';
+      pasteZone.classList.add('has-image');
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function clearImage() {
+    imageB64 = null;
+    imgThumb.src = '';
+    imgThumb.style.display = 'none';
+    pasteHint.textContent = '📎 點擊選擇圖片，或按 Ctrl+V 貼上截圖';
+    clearBtn.style.display = 'none';
+    pasteZone.classList.remove('has-image');
+    fileInput.value = '';
+  }
+
+  // ── Auto-resize textarea ───────────────────────
+  const ta = document.getElementById('question');
+  ta.addEventListener('input', () => {
+    ta.style.height = 'auto';
+    ta.style.height = Math.min(ta.scrollHeight, 160) + 'px';
+  });
+
+  ta.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && e.ctrlKey) {
+      e.preventDefault();
+      sendMessage();
+    }
+  });
+
+  document.getElementById('send-btn').addEventListener('click', sendMessage);
+
+  // ── Chat logic ─────────────────────────────────
+  const history  = document.getElementById('history');
+  const empty    = document.getElementById('empty');
+  const sendBtn  = document.getElementById('send-btn');
+  const badge    = document.getElementById('provider-badge');
+
+  function addMessage(role, text, imgDataUrl, provider) {
+    if (empty) empty.remove();
+
+    const wrap = document.createElement('div');
+    wrap.className = `msg ${role}`;
+
+    if (imgDataUrl) {
+      const img = document.createElement('img');
+      img.src = imgDataUrl;
+      img.className = 'img-preview';
+      wrap.appendChild(img);
+    }
+
+    const bubble = document.createElement('div');
+    if (role === 'ai' && text !== '思考中…') {
+      bubble.className = 'bubble md';
+      bubble.innerHTML = typeof marked !== 'undefined' ? marked.parse(text) : text;
+    } else {
+      bubble.className = 'bubble';
+      bubble.textContent = text;
+    }
+    wrap.appendChild(bubble);
+
+    const meta = document.createElement('div');
+    meta.className = 'meta';
+    if (role === 'user') {
+      meta.textContent = new Date().toLocaleTimeString('zh-TW', {hour:'2-digit', minute:'2-digit'});
+    } else if (provider) {
+      meta.textContent = `由 ${provider} 回答`;
+    }
+    wrap.appendChild(meta);
+
+    history.appendChild(wrap);
+    history.scrollTop = history.scrollHeight;
+    return { wrap, bubble };
+  }
+
+  async function sendMessage() {
+    const q = ta.value.trim();
+    if (!q && !imageB64) return;
+
+    const currentImg = imageB64;
+    const currentImgUrl = imgThumb.src || null;
+
+    // Show user message
+    addMessage('user', q || '（圖片）', currentImgUrl && currentImg ? currentImgUrl : null, null);
+
+    // Clear input
+    ta.value = '';
+    ta.style.height = 'auto';
+    clearImage();
+    sendBtn.disabled = true;
+
+    // Show thinking
+    const { wrap: thinkWrap, bubble: thinkBubble } = addMessage('ai', '思考中…', null, null);
+    thinkWrap.classList.add('thinking');
+
+    try {
+      const resp = await fetch('/ask', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ question: q || '請描述這張圖片的內容', image_b64: currentImg }),
+      });
+
+      const data = await resp.json();
+
+      thinkWrap.classList.remove('thinking');
+      if (!resp.ok) {
+        thinkBubble.textContent = '❌ 錯誤：' + (data.detail || resp.statusText);
+        badge.textContent = 'Error';
+        badge.style.background = '#e53e3e';
+      } else {
+        // Render markdown + math
+        thinkBubble.className = 'bubble md';
+        thinkBubble.innerHTML = typeof marked !== 'undefined' ? marked.parse(data.answer) : data.answer;
+        // Trigger MathJax re-render
+        if (window.MathJax?.typesetPromise) {
+          MathJax.typesetPromise([thinkBubble]).catch(() => {});
+        }
+        // Update provider badge
+        badge.textContent = data.provider;
+        badge.style.background = data.provider === 'Gemini'
+          ? '#0ea66a' : data.provider === 'OpenAI'
+          ? '#7c5cd8' : '#d4720b';
+        // Update meta
+        const meta = thinkWrap.querySelector('.meta');
+        if (meta) meta.textContent = `由 ${data.provider} 回答`;
+      }
+    } catch (err) {
+      thinkWrap.classList.remove('thinking');
+      thinkBubble.textContent = '❌ 連線失敗：' + err.message;
+    } finally {
+      sendBtn.disabled = false;
+      ta.focus();
+      history.scrollTop = history.scrollHeight;
+    }
+  }
+</script>
+
+</body>
+</html>
