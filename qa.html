@@ -254,7 +254,7 @@
     // API Key 儲存在瀏覽器 localStorage，不寫在程式碼裡（安全做法）
     function getApiKey() { return localStorage.getItem('gemini_api_key') || ''; }
     function getApiUrl() {
-      return 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=' + getApiKey();
+      return 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=' + getApiKey();
     }
 
     let selectedSubject = '';
@@ -327,27 +327,31 @@
     }
 
     async function callGemini(question, subject) {
-      const subjectHint = subject ? `（這是關於高中【${subject}】科目的問題）` : '（這是高中課業問題）';
+      const subjectHint = subject ? `，科目為【${subject}】` : '';
 
-      const prompt = `你是一位專業的台灣高中補習班老師。請用【繁體中文】回答以下問題${subjectHint}。
+      const systemPrompt = `你是一位專業的台灣高中老師${subjectHint}。
+你的任務是直接、正確、完整地回答學生的課業問題。
 
-回答規則：
-1. 全程使用繁體中文說明
-2. 如果問題涉及英文科目，英文的專有術語或文法名稱，要同時保留英文原文並加上中文解釋，例如：現在完成式（Present Perfect Tense）
-3. 回答要清楚、有條理，適合高中生理解
-4. 如有公式或重點，請用條列或分段呈現
-5. 結尾可補充一個簡短範例或記憶技巧
+【嚴格規則】
+- 必須全程使用繁體中文回答，不得使用簡體中文
+- 必須直接回答問題，不得拒絕、閃避或說「這個問題有很多面向」
+- 不得要求學生補充資訊，直接根據問題給出最完整的答案
+- 回答結構：① 直接說明核心概念 ② 詳細解釋 ③ 舉例說明
+- 若問題涉及英文文法或術語，保留英文原文並加上繁體中文解釋，例如：現在完成式（Present Perfect Tense）
+- 若問題涉及數學公式，請清楚列出公式與計算步驟
+- 回答長度：適中，重點清楚，不要過於冗長
+- 禁止回答任何與高中課業無關的內容，若問題不是課業問題，請說「請問高中課業相關的問題，我才能幫你解答！」
 
-學生的問題：${question}`;
+學生的問題是：${question}`;
 
       const res = await fetch(getApiUrl(), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          contents: [{ parts: [{ text: prompt }] }],
+          contents: [{ parts: [{ text: systemPrompt }] }],
           generationConfig: {
-            temperature: 0.7,
-            maxOutputTokens: 1024
+            temperature: 0.3,
+            maxOutputTokens: 8192
           }
         })
       });
