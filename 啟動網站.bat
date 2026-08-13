@@ -4,11 +4,19 @@ echo ================================
 echo   高中線上學習平台 - 啟動中...
 echo ================================
 echo.
-echo 正在啟動本機伺服器，請稍候...
-echo 伺服器啟動後，瀏覽器會自動開啟。
-echo 關閉此視窗即可停止伺服器。
-echo.
+
+:: 重新載入系統環境變數（讓 node/npx 可以找到）
+for /f "tokens=*" %%i in ('powershell -Command "[System.Environment]::GetEnvironmentVariable(\"Path\",\"Machine\")"') do set "SYS_PATH=%%i"
+for /f "tokens=*" %%i in ('powershell -Command "[System.Environment]::GetEnvironmentVariable(\"Path\",\"User\")"') do set "USR_PATH=%%i"
+set "PATH=%SYS_PATH%;%USR_PATH%"
+
+echo 正在啟動本機伺服器（port 8080）...
 cd /d "%~dp0"
-start "" "http://localhost:8080"
+
+:: 延遲 2 秒後開啟瀏覽器
+start "" timeout /t 3 /nobreak > nul & start "" "http://localhost:8080/qa.html"
+start /wait "" timeout /t 2 /nobreak > nul
+start "" "http://localhost:8080/qa.html"
+
 npx --yes http-server . -p 8080 -c-1 --cors
 pause
