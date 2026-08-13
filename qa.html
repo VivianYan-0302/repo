@@ -6,10 +6,9 @@
   <title>智慧問答 - 高中學習平台</title>
   <link rel="stylesheet" href="css/style.css" />
   <style>
-    /* ===== QA Page ===== */
     .qa-layout {
       display: grid;
-      grid-template-columns: 260px 1fr;
+      grid-template-columns: 240px 1fr;
       gap: 1.5rem;
       max-width: 1100px;
       margin: 0 auto;
@@ -17,12 +16,8 @@
     }
     @media (max-width: 768px) {
       .qa-layout { grid-template-columns: 1fr; }
-      .qa-sidebar { order: 2; }
-      .qa-main    { order: 1; }
     }
 
-    /* 側邊欄 */
-    .qa-sidebar {}
     .sidebar-card {
       background: #fff;
       border-radius: 12px;
@@ -41,10 +36,10 @@
       display: block;
       width: 100%;
       text-align: left;
-      padding: 0.5rem 0.7rem;
+      padding: 0.45rem 0.7rem;
       border: none;
       border-radius: 6px;
-      font-size: 0.88rem;
+      font-size: 0.87rem;
       cursor: pointer;
       background: transparent;
       color: #3a4a5e;
@@ -66,9 +61,6 @@
     }
     .hot-question:hover { color: #1e3a5f; text-decoration: underline; }
     .hot-question:last-child { border-bottom: none; }
-
-    /* 主區 */
-    .qa-main {}
 
     /* 搜尋列 */
     .qa-search-bar {
@@ -93,13 +85,15 @@
     }
     #qaInput:focus { outline: none; border-color: #4a9eff; }
 
-    /* 聊天區 */
+    /* 對話框 */
     .chat-box {
       background: #fff;
       border-radius: 12px;
       box-shadow: 0 2px 8px rgba(0,0,0,0.07);
       padding: 1.5rem;
-      min-height: 360px;
+      min-height: 400px;
+      max-height: 620px;
+      overflow-y: auto;
       display: flex;
       flex-direction: column;
       gap: 1.2rem;
@@ -109,12 +103,11 @@
       margin: auto;
       color: #7a8a9e;
     }
-    .chat-empty .chat-empty-icon { font-size: 3rem; margin-bottom: 0.8rem; }
-    .chat-empty p { font-size: 0.95rem; }
+    .chat-empty-icon { font-size: 3rem; margin-bottom: 0.8rem; }
 
     /* 訊息泡泡 */
     .msg { display: flex; gap: 0.8rem; align-items: flex-start; }
-    .msg.user  { flex-direction: row-reverse; }
+    .msg.user { flex-direction: row-reverse; }
     .msg-avatar {
       width: 36px; height: 36px; border-radius: 50%;
       display: flex; align-items: center; justify-content: center;
@@ -123,59 +116,17 @@
     .msg.bot  .msg-avatar { background: #e0eeff; }
     .msg.user .msg-avatar { background: #dcfce7; }
     .msg-bubble {
-      max-width: 82%;
+      max-width: 85%;
       padding: 0.9rem 1.1rem;
       border-radius: 12px;
       font-size: 0.93rem;
-      line-height: 1.75;
+      line-height: 1.8;
       color: #1a2332;
+      white-space: pre-wrap;
+      word-break: break-word;
     }
     .msg.bot  .msg-bubble { background: #f0f5ff; border-top-left-radius: 2px; }
-    .msg.user .msg-bubble { background: #e8f9ef; border-top-right-radius: 2px; text-align: right; }
-
-    /* 解答卡內部樣式 */
-    .ans-subject {
-      display: inline-block;
-      padding: 0.15rem 0.6rem;
-      border-radius: 99px;
-      font-size: 0.75rem;
-      font-weight: 700;
-      background: #e0e7ff;
-      color: #3730a3;
-      margin-bottom: 0.6rem;
-    }
-    .ans-title {
-      font-size: 1rem;
-      font-weight: 700;
-      color: #1e3a5f;
-      margin-bottom: 0.6rem;
-    }
-    .ans-body { font-size: 0.9rem; color: #2a3a4e; line-height: 1.85; }
-    .ans-body .en-term {
-      font-style: italic;
-      color: #2563a8;
-      font-weight: 600;
-    }
-    .ans-example {
-      background: #f7f9fc;
-      border-left: 3px solid #4a9eff;
-      padding: 0.5rem 0.8rem;
-      border-radius: 0 6px 6px 0;
-      margin-top: 0.7rem;
-      font-size: 0.86rem;
-      color: #3a4a5e;
-      line-height: 1.7;
-    }
-    .ans-tags {
-      display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 0.8rem;
-    }
-    .ans-tag {
-      padding: 0.15rem 0.55rem;
-      border-radius: 99px;
-      font-size: 0.75rem;
-      background: #f0f4f8;
-      color: #5a6a7e;
-    }
+    .msg.user .msg-bubble { background: #e8f9ef; border-top-right-radius: 2px; }
 
     /* 打字動畫 */
     .typing-dots span {
@@ -190,7 +141,32 @@
     .typing-dots span:nth-child(3) { animation-delay: 0.4s; }
     @keyframes bounce {
       0%,80%,100% { transform: translateY(0); }
-      40%         { transform: translateY(-7px); }
+      40%          { transform: translateY(-7px); }
+    }
+
+    /* 科目標籤徽章 */
+    .subject-badge {
+      display: inline-block;
+      padding: 0.15rem 0.55rem;
+      border-radius: 99px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      background: #e0e7ff;
+      color: #3730a3;
+      margin-bottom: 0.4rem;
+    }
+
+    /* AI 標記 */
+    .ai-badge {
+      display: inline-block;
+      font-size: 0.72rem;
+      background: #dbeafe;
+      color: #1d4ed8;
+      border-radius: 99px;
+      padding: 0.1rem 0.5rem;
+      font-weight: 600;
+      margin-left: 0.4rem;
+      vertical-align: middle;
     }
   </style>
 </head>
@@ -208,62 +184,62 @@
   </nav>
 
   <div class="page-header">
-    <h1>💬 智慧問答</h1>
-    <p>輸入任何課業問題，用中文為你詳細解答</p>
+    <h1>💬 智慧問答 <span class="ai-badge">✨ Gemini AI</span></h1>
+    <p>輸入任何課業問題，AI 以繁體中文詳細解答，英文科目的術語附上原文對照</p>
   </div>
 
   <div class="qa-layout">
 
     <!-- 左側欄 -->
-    <div class="qa-sidebar">
-
+    <div>
       <div class="sidebar-card">
-        <h3>📚 依科目篩選</h3>
-        <button class="subject-filter-btn active" onclick="setSubjectFilter('all', this)">🔍 全部科目</button>
-        <button class="subject-filter-btn" onclick="setSubjectFilter('chinese',    this)">📖 國文</button>
-        <button class="subject-filter-btn" onclick="setSubjectFilter('english',    this)">🔤 英文</button>
-        <button class="subject-filter-btn" onclick="setSubjectFilter('math',       this)">➗ 數學</button>
-        <button class="subject-filter-btn" onclick="setSubjectFilter('physics',    this)">⚛️ 物理</button>
-        <button class="subject-filter-btn" onclick="setSubjectFilter('chemistry',  this)">🧪 化學</button>
-        <button class="subject-filter-btn" onclick="setSubjectFilter('biology',    this)">🌿 生物</button>
-        <button class="subject-filter-btn" onclick="setSubjectFilter('history',    this)">📜 歷史</button>
-        <button class="subject-filter-btn" onclick="setSubjectFilter('geography',  this)">🗺️ 地理</button>
-        <button class="subject-filter-btn" onclick="setSubjectFilter('civics',     this)">⚖️ 公民</button>
+        <h3>📚 指定科目（可選）</h3>
+        <button class="subject-filter-btn active" onclick="setSubject('', this)">🔍 不限科目</button>
+        <button class="subject-filter-btn" onclick="setSubject('國文', this)">📖 國文</button>
+        <button class="subject-filter-btn" onclick="setSubject('英文', this)">🔤 英文</button>
+        <button class="subject-filter-btn" onclick="setSubject('數學', this)">➗ 數學</button>
+        <button class="subject-filter-btn" onclick="setSubject('物理', this)">⚛️ 物理</button>
+        <button class="subject-filter-btn" onclick="setSubject('化學', this)">🧪 化學</button>
+        <button class="subject-filter-btn" onclick="setSubject('生物', this)">🌿 生物</button>
+        <button class="subject-filter-btn" onclick="setSubject('歷史', this)">📜 歷史</button>
+        <button class="subject-filter-btn" onclick="setSubject('地理', this)">🗺️ 地理</button>
+        <button class="subject-filter-btn" onclick="setSubject('公民', this)">⚖️ 公民</button>
       </div>
 
       <div class="sidebar-card">
         <h3>🔥 熱門問題</h3>
         <span class="hot-question" onclick="askHot('什麼是光合作用？')">什麼是光合作用？</span>
-        <span class="hot-question" onclick="askHot('牛頓三大運動定律是什麼？')">牛頓三大運動定律是什麼？</span>
+        <span class="hot-question" onclick="askHot('牛頓三大運動定律是什麼？')">牛頓三大運動定律？</span>
         <span class="hot-question" onclick="askHot('現在完成式怎麼用？')">現在完成式怎麼用？</span>
-        <span class="hot-question" onclick="askHot('什麼是微積分？')">什麼是微積分？</span>
-        <span class="hot-question" onclick="askHot('台灣何時成為日本殖民地？')">台灣何時成為日本殖民地？</span>
-        <span class="hot-question" onclick="askHot('pH值是什麼意思？')">pH值是什麼意思？</span>
-        <span class="hot-question" onclick="askHot('DNA是什麼？')">DNA是什麼？</span>
-        <span class="hot-question" onclick="askHot('什麼是supply和demand？')">什麼是 supply 和 demand？</span>
+        <span class="hot-question" onclick="askHot('微積分的基本概念是什麼？')">微積分的基本概念？</span>
+        <span class="hot-question" onclick="askHot('台灣日治時期發生了哪些事？')">台灣日治時期重點？</span>
+        <span class="hot-question" onclick="askHot('pH值是什麼？酸鹼怎麼判斷？')">pH值怎麼判斷？</span>
+        <span class="hot-question" onclick="askHot('DNA的雙螺旋結構是什麼？')">DNA雙螺旋是什麼？</span>
+        <span class="hot-question" onclick="askHot('假設語氣 if 子句怎麼用？')">假設語氣怎麼用？</span>
       </div>
 
+      <div class="sidebar-card">
+        <h3>🗑️ 操作</h3>
+        <button class="btn btn-outline" style="width:100%;font-size:0.88rem;" onclick="clearChat()">清除對話記錄</button>
+      </div>
     </div>
 
     <!-- 右側主區 -->
-    <div class="qa-main">
-      <!-- 搜尋列 -->
+    <div>
       <div class="qa-search-bar">
         <input
           type="text"
           id="qaInput"
-          placeholder="輸入你的問題，例如：什麼是光合作用？現在完成式怎麼用？"
-          onkeydown="if(event.key==='Enter') sendQuestion()"
+          placeholder="輸入課業問題，例如：什麼是慣性？被動語態怎麼用？"
+          onkeydown="if(event.key==='Enter' && !event.shiftKey) { event.preventDefault(); sendQuestion(); }"
         />
-        <button class="btn btn-primary" onclick="sendQuestion()">送出問題</button>
-        <button class="btn btn-outline" onclick="clearChat()" title="清除對話">🗑️</button>
+        <button class="btn btn-primary" id="sendBtn" onclick="sendQuestion()">送出問題</button>
       </div>
 
-      <!-- 對話框 -->
       <div class="chat-box" id="chatBox">
         <div class="chat-empty" id="chatEmpty">
-          <div class="chat-empty-icon">🤔</div>
-          <p>有任何課業問題，都可以問我！<br/>我會用中文幫你詳細解釋。</p>
+          <div class="chat-empty-icon">🤖</div>
+          <p style="font-size:1rem;">任何課業問題都可以問！<br/>AI 會用<strong>繁體中文</strong>詳細解答。</p>
         </div>
       </div>
     </div>
@@ -274,12 +250,44 @@
     <p>© 2025 高中線上學習平台｜祝你金榜題名 🎉</p>
   </footer>
 
-  <script src="data/qa_bank.js"></script>
   <script>
-    let subjectFilter = 'all';
+    // API Key 儲存在瀏覽器 localStorage，不寫在程式碼裡（安全做法）
+    function getApiKey() { return localStorage.getItem('gemini_api_key') || ''; }
+    function getApiUrl() {
+      return 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=' + getApiKey();
+    }
 
-    function setSubjectFilter(subj, btn) {
-      subjectFilter = subj;
+    let selectedSubject = '';
+    let isLoading = false;
+
+    // 頁面載入時，若尚未設定 Key 則顯示輸入框
+    window.addEventListener('DOMContentLoaded', () => {
+      if (!getApiKey()) showKeyPrompt();
+    });
+
+    function showKeyPrompt() {
+      document.getElementById('chatEmpty').innerHTML = `
+        <div class="chat-empty-icon">🔑</div>
+        <p style="font-size:1rem;margin-bottom:1rem;">請先輸入你的 <strong>Gemini API Key</strong> 以啟用 AI 問答</p>
+        <div style="display:flex;gap:0.6rem;justify-content:center;flex-wrap:wrap;">
+          <input id="keyInput" type="password" placeholder="貼上你的 API Key（AIzaSy...）"
+            style="padding:0.5rem 0.8rem;border:1.5px solid #c0d0e0;border-radius:8px;font-size:0.9rem;width:280px;" />
+          <button class="btn btn-primary" style="font-size:0.9rem;" onclick="saveKey()">確認儲存</button>
+        </div>
+        <p style="font-size:0.78rem;color:#7a8a9e;margin-top:0.8rem;">Key 只儲存在你的瀏覽器本機，不會上傳至任何伺服器</p>`;
+    }
+
+    function saveKey() {
+      const k = document.getElementById('keyInput').value.trim();
+      if (!k) { alert('請輸入 API Key！'); return; }
+      localStorage.setItem('gemini_api_key', k);
+      document.getElementById('chatEmpty').innerHTML = `
+        <div class="chat-empty-icon">🤖</div>
+        <p style="font-size:1rem;">任何課業問題都可以問！<br/>AI 會用<strong>繁體中文</strong>詳細解答。</p>`;
+    }
+
+    function setSubject(subj, btn) {
+      selectedSubject = subj;
       document.querySelectorAll('.subject-filter-btn').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
     }
@@ -289,63 +297,104 @@
       sendQuestion();
     }
 
-    function sendQuestion() {
+    async function sendQuestion() {
+      if (isLoading) return;
+      if (!getApiKey()) { showKeyPrompt(); return; }
       const input = document.getElementById('qaInput');
       const q = input.value.trim();
       if (!q) return;
+
       input.value = '';
-
-      // 移除空狀態
       document.getElementById('chatEmpty').style.display = 'none';
+      appendUserMsg(q);
 
-      // 顯示使用者訊息
-      appendMsg('user', q);
-
-      // 顯示打字動畫
       const typingId = appendTyping();
+      isLoading = true;
+      document.getElementById('sendBtn').disabled = true;
 
-      // 模擬延遲後回答
-      setTimeout(() => {
+      try {
+        const answer = await callGemini(q, selectedSubject);
         removeTyping(typingId);
-        const ans = findAnswer(q, subjectFilter);
-        appendAnswer(ans);
+        appendBotMsg(answer, selectedSubject);
+      } catch (err) {
+        removeTyping(typingId);
+        appendBotMsg('⚠️ 很抱歉，回答時發生錯誤：' + err.message + '\n\n請確認網路連線後再試一次。', '');
+      } finally {
+        isLoading = false;
+        document.getElementById('sendBtn').disabled = false;
         scrollChat();
-      }, 600);
+      }
+    }
 
+    async function callGemini(question, subject) {
+      const subjectHint = subject ? `（這是關於高中【${subject}】科目的問題）` : '（這是高中課業問題）';
+
+      const prompt = `你是一位專業的台灣高中補習班老師。請用【繁體中文】回答以下問題${subjectHint}。
+
+回答規則：
+1. 全程使用繁體中文說明
+2. 如果問題涉及英文科目，英文的專有術語或文法名稱，要同時保留英文原文並加上中文解釋，例如：現在完成式（Present Perfect Tense）
+3. 回答要清楚、有條理，適合高中生理解
+4. 如有公式或重點，請用條列或分段呈現
+5. 結尾可補充一個簡短範例或記憶技巧
+
+學生的問題：${question}`;
+
+      const res = await fetch(getApiUrl(), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: prompt }] }],
+          generationConfig: {
+            temperature: 0.7,
+            maxOutputTokens: 1024
+          }
+        })
+      });
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        const msg = err?.error?.message || `HTTP ${res.status}`;
+        throw new Error(msg);
+      }
+
+      const data = await res.json();
+      const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+      if (!text) throw new Error('AI 沒有回傳內容，請再試一次。');
+      return text;
+    }
+
+    /* ===== UI 輔助函式 ===== */
+    function appendUserMsg(text) {
+      const box = document.getElementById('chatBox');
+      const div = document.createElement('div');
+      div.className = 'msg user';
+      div.innerHTML = `
+        <div class="msg-avatar">👤</div>
+        <div class="msg-bubble">${escHtml(text)}</div>`;
+      box.appendChild(div);
       scrollChat();
     }
 
-    function appendMsg(role, text) {
-      const box = document.getElementById('chatBox');
-      const div = document.createElement('div');
-      div.className = `msg ${role}`;
-      div.innerHTML = `
-        <div class="msg-avatar">${role === 'bot' ? '🤖' : '👤'}</div>
-        <div class="msg-bubble">${escHtml(text)}</div>
-      `;
-      box.appendChild(div);
-    }
-
-    function appendAnswer(ans) {
+    function appendBotMsg(text, subject) {
       const box = document.getElementById('chatBox');
       const div = document.createElement('div');
       div.className = 'msg bot';
+      const badge = subject ? `<div class="subject-badge">${subject}</div><br/>` : '';
+      // 將 Markdown 粗體 **text** 轉為 <strong>
+      const formatted = escHtml(text)
+        .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+        .replace(/\*(.+?)\*/g, '<em>$1</em>');
       div.innerHTML = `
         <div class="msg-avatar">🤖</div>
-        <div class="msg-bubble">
-          <div class="ans-subject">${ans.subject}</div>
-          <div class="ans-title">${escHtml(ans.title)}</div>
-          <div class="ans-body">${ans.body}</div>
-          ${ans.example ? `<div class="ans-example">📌 範例：${ans.example}</div>` : ''}
-          ${ans.tags && ans.tags.length ? `<div class="ans-tags">${ans.tags.map(t=>`<span class="ans-tag">${escHtml(t)}</span>`).join('')}</div>` : ''}
-        </div>
-      `;
+        <div class="msg-bubble">${badge}${formatted}</div>`;
       box.appendChild(div);
+      scrollChat();
     }
 
-    let typingCounter = 0;
+    let typingCount = 0;
     function appendTyping() {
-      const id = 'typing_' + (++typingCounter);
+      const id = 'typ_' + (++typingCount);
       const box = document.getElementById('chatBox');
       const div = document.createElement('div');
       div.className = 'msg bot';
@@ -356,6 +405,7 @@
           <div class="typing-dots"><span></span><span></span><span></span></div>
         </div>`;
       box.appendChild(div);
+      scrollChat();
       return id;
     }
     function removeTyping(id) {
@@ -372,45 +422,16 @@
       const box = document.getElementById('chatBox');
       box.innerHTML = `
         <div class="chat-empty" id="chatEmpty">
-          <div class="chat-empty-icon">🤔</div>
-          <p>有任何課業問題，都可以問我！<br/>我會用中文幫你詳細解釋。</p>
+          <div class="chat-empty-icon">🤖</div>
+          <p style="font-size:1rem;">任何課業問題都可以問！<br/>AI 會用<strong>繁體中文</strong>詳細解答。</p>
         </div>`;
     }
 
     function escHtml(str) {
-      return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-    }
-
-    // ===== 查詢邏輯 =====
-    function findAnswer(query, filter) {
-      const q = query.toLowerCase().replace(/[？?！!。，,、\s]/g, '');
-      let pool = QA_BANK;
-      if (filter !== 'all') pool = pool.filter(a => a.subjectKey === filter);
-
-      // 關鍵字比對（計算命中分數）
-      let best = null, bestScore = 0;
-      pool.forEach(item => {
-        let score = 0;
-        item.keywords.forEach(kw => {
-          if (q.includes(kw.toLowerCase().replace(/\s/g,''))) score += 2;
-        });
-        // 標題比對
-        const titleClean = item.title.toLowerCase().replace(/[？?！!。，,、\s]/g,'');
-        if (q.includes(titleClean) || titleClean.includes(q)) score += 5;
-        if (score > bestScore) { bestScore = score; best = item; }
-      });
-
-      if (best && bestScore >= 2) return best;
-
-      // 找不到時回傳提示
-      return {
-        subject: '😅 找不到答案',
-        subjectKey: 'none',
-        title: '抱歉，我還不知道這題的答案',
-        body: `你問的是「<strong>${escHtml(query)}</strong>」，目前我的題庫還沒有這個問題的詳細解答。<br/><br/>你可以試試：<br/>・換個說法重新問看看<br/>・切換左側的科目篩選<br/>・參考科目複習頁面的練習題`,
-        example: null,
-        tags: ['未收錄題目']
-      };
+      return String(str)
+        .replace(/&/g,'&amp;')
+        .replace(/</g,'&lt;')
+        .replace(/>/g,'&gt;');
     }
   </script>
 </body>
