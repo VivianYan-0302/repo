@@ -89,11 +89,13 @@
         <div class="result-score" id="examResultScore">0/0</div>
         <div class="result-label" id="examResultLabel"></div>
         <div class="result-breakdown" id="examResultBreakdown"></div>
-        <div style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;">
+        <div style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;margin-bottom:1.5rem;">
           <button class="btn btn-primary" onclick="startExam()">重新作答</button>
           <button class="btn btn-secondary" onclick="exitExam()">返回列表</button>
           <a href="record.html" class="btn btn-outline">查看記錄</a>
         </div>
+        <button class="btn btn-review" onclick="toggleReview('examReview')">📋 查看整份作答明細</button>
+        <div id="examReview" class="review-list" style="display:none;"></div>
       </div>
     </div>
 
@@ -110,6 +112,7 @@
     let examIndex = 0;
     let examScore = 0;
     let examAnswered = false;
+    let examAnswerLog = [];   // 記錄每題作答情況
 
     function filterExams() {
       const year    = document.getElementById('filterYear').value;
@@ -149,6 +152,7 @@
       }
       examIndex = 0;
       examScore = 0;
+      examAnswerLog = [];
       document.getElementById('examList').style.display = 'none';
       document.getElementById('examQuizArea').style.display = 'block';
       document.getElementById('examResultArea').style.display = 'none';
@@ -194,8 +198,9 @@
       const q = filteredQuestions[examIndex];
       const buttons = document.querySelectorAll('#examOptionsList .option-btn');
       buttons.forEach(b => b.disabled = true);
+      const correct = (index === q.answer);
 
-      if (index === q.answer) {
+      if (correct) {
         buttons[index].classList.add('correct');
         examScore++;
         document.getElementById('examFeedback').textContent = '✅ 答對了！';
@@ -206,6 +211,9 @@
         document.getElementById('examFeedback').textContent = '❌ 答錯了';
         document.getElementById('examFeedback').style.color = '#991b1b';
       }
+
+      // 記錄本題作答
+      examAnswerLog.push({ q, chosen: index, correct });
 
       document.getElementById('examExplanationBox').textContent = '💡 解析：' + q.explanation;
       document.getElementById('examExplanationBox').style.display = 'block';
@@ -237,7 +245,11 @@
         <div class="breakdown-item"><span style="color:#3b82f6">${pct}%</span><span>正確率</span></div>
       `;
 
-      // 儲存記錄
+      // 填入整份明細
+      document.getElementById('examReview').innerHTML = buildReviewHTML(examAnswerLog);
+      document.getElementById('examReview').style.display = 'none';
+
+      // 儲存記錄（含明細）
       const records = JSON.parse(localStorage.getItem('studyRecords') || '[]');
       records.unshift({
         date: new Date().toLocaleDateString('zh-TW'),
@@ -246,9 +258,53 @@
         difficulty: document.getElementById('filterDiff').value,
         score: examScore,
         total: total,
-        pct: pct
+        pct: pct,
+        details: examAnswerLog.map(entry => ({
+          text: entry.q.text,
+          options: entry.q.options,
+          answer: entry.q.answer,
+          chosen: entry.chosen,
+          correct: entry.correct,
+          explanation: entry.q.explanation
+        }))
       });
       localStorage.setItem('studyRecords', JSON.stringify(records.slice(0, 100)));
+    }
+
+    function buildReviewHTML(log) {
+      if (!log || log.length === 0) return '<p style="color:#5a6a7e;padding:1rem;">無作答資料</p>';
+      return log.map((entry, i) => {
+        const { q, chosen, correct } = entry;
+        const optionsHTML = q.options.map((opt, j) => {
+          let cls = '';
+          if (j === q.answer) cls = 'review-opt-correct';
+          if (j === chosen && !correct) cls = 'review-opt-wrong';
+          const mark = j === q.answer ? ' ✅' : (j === chosen && !correct ? ' ❌' : '');
+          return `<div class="review-option ${cls}">${String.fromCharCode(65+j)}. ${opt}${mark}</div>`;
+        }).join('');
+        return `
+          <div class="review-item ${correct ? 'review-correct' : 'review-wrong'}">
+            <div class="review-item-header">
+              <span class="review-num">${correct ? '✅' : '❌'} 第 ${i+1} 題</span>
+              <span class="review-status">${correct ? '答對' : '答錯'}</span>
+            </div>
+            <div class="review-question">${q.text}</div>
+            <div class="review-options">${optionsHTML}</div>
+            <div class="review-explanation">💡 解析：${q.explanation}</div>
+          </div>`;
+      }).join('');
+    }
+
+    function toggleReview(id) {
+      const el = document.getElementById(id);
+      const btn = el.previousElementSibling;
+      if (el.style.display === 'none') {
+        el.style.display = 'block';
+        btn.textContent = '📋 收起作答明細';
+      } else {
+        el.style.display = 'none';
+        btn.textContent = '📋 查看整份作答明細';
+      }
     }
 
     // 初始化

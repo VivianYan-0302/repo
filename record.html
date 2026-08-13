@@ -61,11 +61,23 @@
             <th>難度</th>
             <th>得分</th>
             <th>正確率</th>
+            <th>明細</th>
           </tr>
         </thead>
         <tbody id="recordBody">
         </tbody>
       </table>
+    </div>
+
+    <!-- 作答明細 Modal -->
+    <div id="detailModal" class="detail-modal" style="display:none;" onclick="closeModal(event)">
+      <div class="detail-modal-box">
+        <div class="detail-modal-header">
+          <span id="detailModalTitle">作答明細</span>
+          <button class="detail-modal-close" onclick="closeDetailModal()">✕</button>
+        </div>
+        <div class="detail-modal-body" id="detailModalBody"></div>
+      </div>
     </div>
 
     <!-- 空狀態 -->
@@ -115,9 +127,10 @@
       document.getElementById('bestScore').textContent      = bestPct + '%';
 
       // 渲染表格
-      tbody.innerHTML = records.map(r => {
+      tbody.innerHTML = records.map((r, idx) => {
         const pctClass = r.pct >= 80 ? 'badge-green' : r.pct >= 60 ? 'badge-yellow' : 'badge-red';
         const diffLabel = DIFF_MAP[r.difficulty] || r.difficulty;
+        const hasDetail = r.details && r.details.length > 0;
         return `
           <tr>
             <td>${r.date}</td>
@@ -126,9 +139,53 @@
             <td>${diffLabel}</td>
             <td>${r.score} / ${r.total}</td>
             <td><span class="badge ${pctClass}">${r.pct}%</span></td>
+            <td>${hasDetail
+              ? `<button class="btn-detail" onclick="openDetailModal(${idx})">查看明細</button>`
+              : '<span style="color:#aaa;font-size:0.8rem;">—</span>'}</td>
           </tr>
         `;
       }).join('');
+    }
+
+    function openDetailModal(idx) {
+      const records = JSON.parse(localStorage.getItem('studyRecords') || '[]');
+      const r = records[idx];
+      if (!r || !r.details || r.details.length === 0) return;
+
+      document.getElementById('detailModalTitle').textContent =
+        `${r.date} ${r.time || ''} ｜ ${r.subject} ｜ ${r.score}/${r.total} (${r.pct}%)`;
+
+      document.getElementById('detailModalBody').innerHTML = r.details.map((d, i) => {
+        const optionsHTML = d.options.map((opt, j) => {
+          let cls = '';
+          if (j === d.answer) cls = 'review-opt-correct';
+          if (j === d.chosen && !d.correct) cls = 'review-opt-wrong';
+          const mark = j === d.answer ? ' ✅' : (j === d.chosen && !d.correct ? ' ❌' : '');
+          return `<div class="review-option ${cls}">${String.fromCharCode(65+j)}. ${opt}${mark}</div>`;
+        }).join('');
+        return `
+          <div class="review-item ${d.correct ? 'review-correct' : 'review-wrong'}">
+            <div class="review-item-header">
+              <span class="review-num">${d.correct ? '✅' : '❌'} 第 ${i+1} 題</span>
+              <span class="review-status">${d.correct ? '答對' : '答錯'}</span>
+            </div>
+            <div class="review-question">${d.text}</div>
+            <div class="review-options">${optionsHTML}</div>
+            <div class="review-explanation">💡 解析：${d.explanation}</div>
+          </div>`;
+      }).join('');
+
+      document.getElementById('detailModal').style.display = 'flex';
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeDetailModal() {
+      document.getElementById('detailModal').style.display = 'none';
+      document.body.style.overflow = '';
+    }
+
+    function closeModal(e) {
+      if (e.target === document.getElementById('detailModal')) closeDetailModal();
     }
 
     function clearRecords() {
