@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>學習記錄 - 高中學習平台</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <nav class="navbar">
+    <div class="nav-brand">📚 高中學習平台</div>
+    <ul class="nav-links">
+      <li><a href="index.html">首頁</a></li>
+      <li><a href="subjects.html">科目複習</a></li>
+      <li><a href="exam.html">學測考古題</a></li>
+      <li><a href="writing.html">作文練習</a></li>
+      <li><a href="record.html" class="active">學習記錄</a></li>
+    </ul>
+  </nav>
+
+  <div class="page-header">
+    <h1>📊 學習記錄</h1>
+    <p>追蹤每次練習成績，找出弱點，持續進步</p>
+  </div>
+
+  <div class="container">
+
+    <!-- 統計摘要 -->
+    <div class="record-summary" id="recordSummary">
+      <div class="record-stat">
+        <div class="stat-num" id="totalSessions">0</div>
+        <div class="stat-lbl">總練習次數</div>
+      </div>
+      <div class="record-stat">
+        <div class="stat-num" id="totalQuestions">0</div>
+        <div class="stat-lbl">作答題數</div>
+      </div>
+      <div class="record-stat">
+        <div class="stat-num" id="avgScore">0%</div>
+        <div class="stat-lbl">平均正確率</div>
+      </div>
+      <div class="record-stat">
+        <div class="stat-num" id="bestScore">-</div>
+        <div class="stat-lbl">最高正確率</div>
+      </div>
+    </div>
+
+    <!-- 操作按鈕 -->
+    <div style="display:flex;justify-content:flex-end;margin-bottom:1rem;gap:0.8rem;">
+      <button class="btn btn-danger" onclick="clearRecords()" style="font-size:0.85rem;padding:0.4rem 1rem;">清除記錄</button>
+    </div>
+
+    <!-- 記錄表格 -->
+    <div class="record-table-wrap" id="recordTableWrap">
+      <table class="record-table">
+        <thead>
+          <tr>
+            <th>日期</th>
+            <th>時間</th>
+            <th>科目</th>
+            <th>難度</th>
+            <th>得分</th>
+            <th>正確率</th>
+          </tr>
+        </thead>
+        <tbody id="recordBody">
+        </tbody>
+      </table>
+    </div>
+
+    <!-- 空狀態 -->
+    <div id="emptyState" style="display:none;text-align:center;padding:3rem;color:#5a6a7e;">
+      <div style="font-size:3rem;margin-bottom:1rem;">📋</div>
+      <p style="font-size:1.1rem;">尚無學習記錄，快去練習吧！</p>
+      <a href="subjects.html" class="btn btn-primary" style="margin-top:1.2rem;display:inline-block;">開始練習</a>
+    </div>
+
+  </div>
+
+  <footer>
+    <p>© 2025 高中線上學習平台｜祝你金榜題名 🎉</p>
+  </footer>
+
+  <script>
+    const DIFF_MAP = { easy:'基礎', medium:'進階', hard:'挑戰', all:'全部' };
+
+    function loadRecords() {
+      const records = JSON.parse(localStorage.getItem('studyRecords') || '[]');
+      const tableWrap = document.getElementById('recordTableWrap');
+      const emptyState = document.getElementById('emptyState');
+      const tbody = document.getElementById('recordBody');
+
+      if (records.length === 0) {
+        tableWrap.style.display = 'none';
+        emptyState.style.display = 'block';
+        document.getElementById('totalSessions').textContent = 0;
+        document.getElementById('totalQuestions').textContent = 0;
+        document.getElementById('avgScore').textContent = '0%';
+        document.getElementById('bestScore').textContent = '-';
+        return;
+      }
+
+      tableWrap.style.display = 'block';
+      emptyState.style.display = 'none';
+
+      // 統計
+      const totalSessions   = records.length;
+      const totalQuestions  = records.reduce((sum, r) => sum + r.total, 0);
+      const avgPct          = Math.round(records.reduce((sum, r) => sum + r.pct, 0) / totalSessions);
+      const bestPct         = Math.max(...records.map(r => r.pct));
+
+      document.getElementById('totalSessions').textContent  = totalSessions;
+      document.getElementById('totalQuestions').textContent = totalQuestions;
+      document.getElementById('avgScore').textContent       = avgPct + '%';
+      document.getElementById('bestScore').textContent      = bestPct + '%';
+
+      // 渲染表格
+      tbody.innerHTML = records.map(r => {
+        const pctClass = r.pct >= 80 ? 'badge-green' : r.pct >= 60 ? 'badge-yellow' : 'badge-red';
+        const diffLabel = DIFF_MAP[r.difficulty] || r.difficulty;
+        return `
+          <tr>
+            <td>${r.date}</td>
+            <td>${r.time || '-'}</td>
+            <td>${r.subject}</td>
+            <td>${diffLabel}</td>
+            <td>${r.score} / ${r.total}</td>
+            <td><span class="badge ${pctClass}">${r.pct}%</span></td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function clearRecords() {
+      if (confirm('確定要清除所有學習記錄嗎？此操作無法復原。')) {
+        localStorage.removeItem('studyRecords');
+        loadRecords();
+      }
+    }
+
+    loadRecords();
+  </script>
+</body>
+</html>
